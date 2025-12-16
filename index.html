@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Health Hack — Stage 3 CKD Support</title>
+  <meta name="description" content="Health Hack: a Stage 3 CKD companion for meals, hydration, blood pressure, mindset, and AI guidance." />
+  <style>
+    :root{
+      --bg:#0b1020;
+      --bg2:#0f1733;
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.09);
+      --border:rgba(255,255,255,.14);
+      --text:#eaf0ff;
+      --muted:rgba(234,240,255,.72);
+      --blue:#2b6ff0;
+      --blue2:#5aa0ff;
+      --green:#29d391;
+      --amber:#ffd166;
+      --shadow: 0 18px 45px rgba(0,0,0,.45);
+      --radius:18px;
+      --radius2:22px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 800px at 10% 10%, rgba(43,111,240,.22), transparent 55%),
+        radial-gradient(900px 700px at 85% 20%, rgba(41,211,145,.18), transparent 50%),
+        radial-gradient(900px 700px at 45% 90%, rgba(255,209,102,.12), transparent 55%),
+        linear-gradient(180deg, var(--bg), #060916);
+      color:var(--text);
+      overflow-x:hidden;
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1120px;margin:0 auto;padding:24px}
+    .nav{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
+      position:sticky;top:0;z-index:40;
+      padding:14px 16px;margin:-24px -24px 22px;
+      background: linear-gradient(180deg, rgba(11,16,32,.92), rgba(11,16,32,.55));
+      backdrop-filter: blur(14px);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:44px;height:44px;border-radius:14px;
+      background: radial-gradient(circle at 30% 30%, rgba(90,160,255,.9), rgba(43,111,240,.25));
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow: 0 14px 28px rgba(43,111,240,.18);
+      display:grid;place-items:center;
+      font-weight:900;
+    }
+    .brand h1{font-size:16px;margin:0;letter-spacing:.2px}
+    .brand p{margin:0;color:var(--muted);font-size:12px}
+    .navActions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 14px;border-radius:999px;
+      font-weight:800;letter-spacing:.2px;
+      cursor:pointer;transition:.2s transform,.2s background,.2s border;
+      user-select:none;
+    }
+    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.22)}
+    .btnPrimary{
+      background: linear-gradient(180deg, rgba(43,111,240,.95), rgba(43,111,240,.72));
+      border-color: rgba(90,160,255,.55);
+      box-shadow: 0 18px 40px rgba(43,111,240,.25);
+    }
+    .btnPrimary:hover{background: linear-gradient(180deg, rgba(90,160,255,.98), rgba(43,111,240,.80))}
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+      align-items:start;
+    }
+    @media (max-width: 920px){ .grid{grid-template-columns:1fr} }
+    .hero{
+      border:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      padding:22px;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:before{
+      content:"";
+      position:absolute;inset:-2px;
+      background: radial-gradient(700px 350px at 10% 0%, rgba(90,160,255,.22), transparent 55%),
+                  radial-gradient(650px 350px at 85% 35%, rgba(41,211,145,.16), transparent 55%);
+      pointer-events:none;
+    }
+    .heroInner{position:relative}
+    .kicker{
+      display:inline-flex;gap:10px;align-items:center;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      padding:8px 12px;border-radius:999px;
+      font-weight:900;font-size:12px;color:rgba(234,240,255,.92);
+      letter-spacing:.35px;text-transform:uppercase;
+    }
+    .kdot{width:8px;height:8px;border-radius:99px;background:var(--green);box-shadow:0 0 0 6px rgba(41,211,145,.12)}
+    .title{
+      font-size:44px;line-height:1.02;margin:14px 0 10px;
+      letter-spacing:-.8px;
+    }
+    .subtitle{
+      color:var(--muted);
+      font-size:16px;line-height:1.6;margin:0 0 18px;
+      max-width: 62ch;
+    }
+    .ctaRow{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+    .mini{
+      color:var(--muted);font-size:12px;line-height:1.55;margin-top:12px
+    }
+    .panel{
+      border:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(15,23,51,.75), rgba(15,23,51,.42));
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      padding:18px;
+    }
+    .panel h2{margin:0 0 10px;font-size:18px;letter-spacing:.2px}
+    .statRow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    .stat{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      border-radius:16px;
+      padding:12px;
+    }
+    .stat b{display:block;font-size:22px}
+    .stat span{color:var(--muted);font-size:12px}
+    .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}
+    @media (max-width: 680px){ .cards{grid-template-columns:1fr} }
+    .card{
+      border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      padding:16px;
+      box-shadow: 0 14px 32px rgba(0,0,0,.28);
+    }
+    .cardTop{display:flex;gap:12px;align-items:flex-start}
+    .icon{
+      width:42px;height:42px;border-radius:14px;
+      display:grid;place-items:center;
+      background: rgba(90,160,255,.14);
+      border:1px solid rgba(90,160,255,.25);
+      font-size:18px;
+    }
+    .card h3{margin:0;font-size:16px}
+    .card p{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+    .card .link{
+      display:inline-flex;gap:8px;align-items:center;
+      margin-top:12px;
+      font-weight:900;font-size:13px;
+      color:rgba(234,240,255,.92);
+      opacity:.95;
+    }
+    .link:hover{opacity:1}
+    .tipStack{margin-top:14px;display:flex;flex-direction:column;gap:12px}
+    .tip{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      border-radius: 16px;
+      padding:14px;
+    }
+    .tip h4{margin:0 0 6px;font-size:14px}
+    .tip .body{color:var(--muted);font-size:13px;line-height:1.55}
+    .action{
+      margin-top:10px;
+      border:1px solid rgba(41,211,145,.35);
+      background: rgba(41,211,145,.12);
+      border-radius: 14px;
+      padding:10px 12px;
+    }
+    .action b{display:block;color:rgba(41,211,145,.95);letter-spacing:.4px}
+    .action span{display:block;color:rgba(41,211,145,.90);font-weight:800;margin-top:6px}
+    .footer{
+      margin-top:22px;
+      padding:18px;
+      border-top:1px solid rgba(255,255,255,.10);
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+    }
+    .toast{
+      position:fixed;left:50%;transform:translateX(-50%);
+      bottom:18px;z-index:60;
+      background: rgba(15,23,51,.92);
+      border:1px solid rgba(255,255,255,.14);
+      padding:12px 14px;border-radius:999px;
+      box-shadow: var(--shadow);
+      display:none;
+      align-items:center;
+      gap:10px;
+      max-width: min(90vw, 780px);
+    }
+    .toast .dot{width:10px;height:10px;border-radius:99px;background:var(--blue2);box-shadow:0 0 0 6px rgba(90,160,255,.10)}
+    .toast small{color:rgba(234,240,255,.9);font-weight:800}
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      padding:3px 8px;border-radius:10px;
+      color:rgba(234,240,255,.92);
+      font-size:12px;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="nav">
+    <div class="brand">
+      <div class="logo">HH</div>
+      <div>
+        <h1>Health Hack</h1>
+        <p>Stage 3 CKD • Meals • Mind • BP • Hydration</p>
+      </div>
+    </div>
+    <div class="navActions">
+      <a class="btn" href="#tips">Stage 3 Tips</a>
+      <a class="btn" href="#features">Features</a>
+      <button class="btn btnPrimary" id="btnStart">Open App Demo</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="grid">
+      <div class="hero">
+        <div class="heroInner">
+          <div class="kicker"><span class="kdot"></span>Built for Stage 3 CKD • Daily Support</div>
+          <h2 class="title">Your life is bigger than CKD. <span style="color:rgba(90,160,255,.95)">We help you run it.</span></h2>
+          <p class="subtitle">
+            Health Hack is a private, local-first companion that helps you track meals, hydration and blood pressure,
+            while giving Stage 3 kidney tips with clear action steps — plus an AI Nutritionist and AI Psychologist for guidance.
+          </p>
+
+          <div class="ctaRow">
+            <button class="btn btnPrimary" id="btnNutritionist">Talk to AI Nutritionist</button>
+            <button class="btn" id="btnTips">View Stage 3 Tips</button>
+            <button class="btn" id="btnLogMeal">Log a Meal</button>
+          </div>
+
+          <p class="mini">
+            No shame. No overwhelm. Just the next best move — every day.
+            <span class="kbd">Stage 3</span> is selected by default.
+          </p>
+
+          <div class="cards" id="features">
+            <div class="card">
+              <div class="cardTop">
+                <div class="icon">🍽️</div>
+                <div>
+                  <h3>Meal Log + Ratings</h3>
+                  <p>Track meals by type (Breakfast/Lunch/Dinner/Snack), rate healthiness 1–5, and add notes.</p>
+                  <span class="link">Open Meals →</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="cardTop">
+                <div class="icon">🩺</div>
+                <div>
+                  <h3>Blood Pressure Tracker</h3>
+                  <p>Log systolic/diastolic readings and understand ranges with a simple guideline legend.</p>
+                  <span class="link">Open BP →</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="cardTop">
+                <div class="icon">💧</div>
+                <div>
+                  <h3>Hydration Tracker</h3>
+                  <p>Quick-add 8/12/16oz and visualize progress. Hydration targets can vary — follow your clinician.</p>
+                  <span class="link">Open Water →</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="cardTop">
+                <div class="icon">🧠</div>
+                <div>
+                  <h3>Mind Check-In</h3>
+                  <p>Pick your mood, vent safely, and get supportive guidance (not a replacement for professional care).</p>
+                  <span class="link">Open Mind →</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <aside class="panel">
+        <h2>Stage 3 Snapshot</h2>
+        <p class="subtitle" style="margin:0">
+          You’re in the “manage & protect” phase. Small choices stack. This app keeps you consistent.
+        </p>
+
+        <div class="statRow">
+          <div class="stat">
+            <b id="statMeals">0</b>
+            <span>Meals logged today</span>
+          </div>
+          <div class="stat">
+            <b id="statActions">0</b>
+            <span>Action steps completed</span>
+          </div>
+        </div>
+
+        <div class="tipStack" id="tips">
+          <div class="tip">
+            <h4>❤️ Monitor Blood Pressure Daily</h4>
+            <div class="body">High blood pressure damages kidneys. Track at the same time each day for consistent readings.</div>
+            <div class="action"><b>ACTION STEP:</b><span>Log your BP reading now.</span></div>
+          </div>
+          <div class="tip">
+            <h4>🛡️ Avoid Kidney-Harming Substances</h4>
+            <div class="body">Limit NSAIDs (like ibuprofen) unless your clinician says otherwise. Avoid smoking and heavy alcohol.</div>
+            <div class="action"><b>ACTION STEP:</b><span>Review your pain relief options with your clinician.</span></div>
+          </div>
+          <div class="tip">
+            <h4>💧 Hydrate (Don’t Overdo It)</h4>
+            <div class="body">Fluid goals can vary by condition. Track intake and ask your care team for your personal target.</div>
+            <div class="action"><b>ACTION STEP:</b><span>Add your next 8–12oz in the tracker.</span></div>
+          </div>
+          <div class="tip">
+            <h4>🍽️ Reduce Sodium, Limit Processed Foods</h4>
+            <div class="body">Packaged foods are sodium bombs. Cook simple meals and read labels when you can.</div>
+            <div class="action"><b>ACTION STEP:</b><span>Pick one low-sodium swap for tomorrow.</span></div>
+          </div>
+        </div>
+
+        <button class="btn btnPrimary" style="width:100%;margin-top:14px" id="btnCompleteAction">
+          Complete 1 Action Step
+        </button>
+
+        <div class="footer">
+          <b style="color:rgba(234,240,255,.92)">Important:</b> Health Hack provides educational guidance and habit support — not medical diagnosis or treatment.
+          For CKD Stage 3, always follow your nephrologist/clinician’s plan for diet, fluids, meds, and activity.
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">
+    <span class="dot"></span>
+    <small id="toastText">Saved.</small>
+  </div>
+
+  <script>
+    // --- tiny "power move" JS: local-first counters + micro interactions ---
+    const $ = (id) => document.getElementById(id);
+
+    const state = {
+      mealsToday: Number(localStorage.getItem("hh_mealsToday") || "0"),
+      actions: Number(localStorage.getItem("hh_actions") || "0")
+    };
+
+    function setCounters(){
+      $("statMeals").textContent = state.mealsToday;
+      $("statActions").textContent = state.actions;
+    }
+
+    function toast(msg){
+      $("toastText").textContent = msg;
+      $("toast").style.display = "flex";
+      clearTimeout(window.__t);
+      window.__t = setTimeout(()=> $("toast").style.display="none", 2200);
+    }
+
+    function save(){
+      localStorage.setItem("hh_mealsToday", String(state.mealsToday));
+      localStorage.setItem("hh_actions", String(state.actions));
+      setCounters();
+    }
+
+    // Buttons
+    $("btnStart").addEventListener("click", () => {
+      toast("App demo opened (hook this to your Next.js /meals route).");
+    });
+
+    $("btnTips").addEventListener("click", () => {
+      document.querySelector("#tips").scrollIntoView({behavior:"smooth", block:"start"});
+      toast("Stage 3 tips loaded.");
+    });
+
+    $("btnLogMeal").addEventListener("click", () => {
+      state.mealsToday += 1;
+      save();
+      toast("Meal logged ✅ (demo counter).");
+    });
+
+    $("btnNutritionist").addEventListener("click", () => {
+      toast("AI Nutritionist (demo): swap processed foods → fresh + low sodium.");
+    });
+
+    $("btnCompleteAction").addEventListener("click", () => {
+      state.actions += 1;
+      save();
+      toast("Action step completed ✅");
+    });
+
+    // Init
+    setCounters();
+  </script>
+</body>
+</html>
