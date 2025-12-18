@@ -1,0 +1,45 @@
+{
+  "tagSignals": {
+    "fast-food": { "sodiumBoost": 250, "sugarBoost": 5, "message": "Fast-food tends to spike sodium + added sugar. Consider a lighter next meal." },
+    "fried": { "calorieBoost": 200, "message": "Fried foods add calories fast. Balance with lean protein + fiber next." },
+    "soda": { "sugarBoost": 25, "message": "Soda usually blows past added sugar. Swap to zero-sugar or water." },
+    "salad": { "fiberBoost": 4, "message": "Great. Keep fiber coming—aim to add protein to stay full." },
+    "high-protein": { "proteinBoost": 20, "message": "Solid protein choice. Watch sodium if it’s processed meat." }
+  },
+  "modes": {
+    "general": {
+      "priorities": ["balance", "fiber", "sugar", "sodium"],
+      "defaults": { "sodium": 2300, "sugar": 36, "fiber": 25 }
+    },
+    "fatloss": {
+      "priorities": ["calories", "fiber", "protein", "sugar"],
+      "defaults": { "fiber": 28, "sugar": 30 }
+    },
+    "muscle": {
+      "priorities": ["protein", "calories", "carbs", "sodium"],
+      "defaults": { "protein": 140, "fiber": 25 }
+    },
+    "kidney_stage3": {
+      "priorities": ["sodium", "protein", "addedSugar", "fiber"],
+      "defaults": { "sodium": 2000, "sugar": 30, "fiber": 25 },
+      "notes": [
+        "Kidney-friendly suggestions are general and not medical advice.",
+        "Targets vary a lot by labs/doctor instructions."
+      ]
+    }
+  },
+  "coachingTemplates": {
+    "win": [
+      "You're on track today. Don’t get cute—finish strong with a simple, clean next meal.",
+      "This is what winning looks like: consistent, boring, repeatable. Keep it going."
+    ],
+    "nudge": [
+      "Small fix: tighten one thing (sodium or sugar) and your day improves fast.",
+      "You don’t need perfect—you need better choices *on purpose*."
+    ],
+    "warning": [
+      "Today is drifting. That’s fine—reset with your next meal, not tomorrow.",
+      "Your numbers are trying to tell you something. Listen and adjust now."
+    ]
+  }
+}
