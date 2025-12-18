@@ -5,106 +5,131 @@
   <title>Health Hack | Medical AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Medical AI assistant with health metrics, guidance, and emergency education." />
+
   <link rel="stylesheet" href="medical.css" />
 </head>
 
 <body>
+  <div class="page">
 
-  <!-- ===================== HEADER ===================== -->
-  <header class="medical-header">
-    <h1>🩺 Medical AI</h1>
-    <p>Your AI health assistant — guidance, tracking, and emergency awareness.</p>
-  </header>
-
-  <!-- ===================== DISCLAIMER ===================== -->
-  <section class="disclaimer">
-    <strong>Medical Disclaimer:</strong>
-    This AI does not provide medical diagnosis or treatment.
-    Always consult a licensed medical professional.
-    In emergencies, call <strong>911</strong>.
-  </section>
-
-  <!-- ===================== AI CHAT ===================== -->
-  <section class="ai-chat">
-    <h2>Ask Medical AI</h2>
-
-    <div class="chat-box" id="chatBox">
-      <div class="chat-message ai">
-        Hello. I can answer general health questions, explain readings, and guide you safely.
+    <!-- ===================== HEADER ===================== -->
+    <header class="medical-header">
+      <div class="container">
+        <h1>🩺 Medical AI</h1>
+        <p>Your AI health assistant — guidance, tracking, and emergency awareness.</p>
       </div>
-    </div>
+    </header>
 
-    <div class="chat-input">
-      <input id="chatInput" type="text" placeholder="Ask a medical question…" />
-      <button id="chatSend">Send</button>
-    </div>
-
-    <div class="chat-mini-note">
-      Tip: Ask “What does 118/76 mean?”, “How much water should I drink?”, “What are stroke warning signs?”
-    </div>
-  </section>
-
-  <!-- ===================== HEALTH METRICS ===================== -->
-  <section class="metrics">
-    <h2>Health Snapshot</h2>
-
-    <div class="metric-grid">
-      <div class="metric-card">
-        <span class="metric-label">Blood Pressure</span>
-        <span class="metric-value" id="bpValue">118 / 76</span>
-        <button class="metric-btn" id="bpBtn">Press wrist sensor</button>
+    <!-- ===================== DISCLAIMER ===================== -->
+    <section class="disclaimer">
+      <div class="container">
+        <strong>Medical Disclaimer:</strong>
+        This AI does not provide medical diagnosis or treatment.
+        Always consult a licensed medical professional.
+        In emergencies, call <strong>911</strong>.
       </div>
+    </section>
 
-      <div class="metric-card">
-        <span class="metric-label">Steps Today</span>
-        <span class="metric-value" id="stepsValue">6,420</span>
+    <!-- ===================== AI CHAT ===================== -->
+    <section class="ai-chat">
+      <div class="container">
+        <div class="section-head">
+          <h2>Ask Medical AI</h2>
+          <span class="tag">General info only • Not medical advice</span>
+        </div>
+
+        <div class="chat-box" id="chatBox" aria-live="polite">
+          <div class="chat-message ai">
+            Hello. I can answer general health questions, explain readings, and guide you safely.
+          </div>
+        </div>
+
+        <div class="chat-input">
+          <input id="chatInput" type="text" placeholder="Ask a medical question…" autocomplete="off" />
+          <button id="chatSend" type="button">Send</button>
+        </div>
+
+        <p class="chat-mini-note">
+          Try: “What does 118/76 mean?”, “How much water should I drink?”, “What are stroke warning signs?”
+        </p>
       </div>
+    </section>
 
-      <div class="metric-card">
-        <span class="metric-label">Water Intake</span>
-        <span class="metric-value" id="waterValue">64 oz</span>
-      </div>
-    </div>
-  </section>
+    <!-- ===================== HEALTH METRICS ===================== -->
+    <section class="metrics">
+      <div class="container">
+        <div class="section-head">
+          <h2>Health Snapshot</h2>
+          <span class="tag">Demo values • Replace with real sensors later</span>
+        </div>
 
-  <!-- ===================== BOTTOM VISUALS + TEXT ===================== -->
-  <section class="bottom-visuals">
-    <div class="bv-card">
-      <div class="bv-grid">
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span class="metric-label">Blood Pressure</span>
+            <span class="metric-value" id="bpValue">118 / 76</span>
+            <button class="metric-btn" id="bpBtn" type="button">Press wrist sensor</button>
+          </div>
 
-        <figure class="bv-figure">
-          <img src="assets/cpr-hands.png" alt="CPR hand placement" />
-          <figcaption>Hands placed in the center of the chest.</figcaption>
-        </figure>
+          <div class="metric-card">
+            <span class="metric-label">Steps Today</span>
+            <span class="metric-value" id="stepsValue">6,420</span>
+            <div class="metric-sub">Auto from phone later</div>
+          </div>
 
-        <figure class="bv-figure">
-          <img src="assets/cpr-compressions.png" alt="CPR compressions" />
-          <figcaption>Push hard & fast — 100–120 compressions per minute.</figcaption>
-        </figure>
-
-      </div>
-
-      <div class="bv-text">
-        <h2>CPR Quick Guide</h2>
-
-        <ol>
-          <li>Check responsiveness (tap & shout).</li>
-          <li>Call 911 or have someone call.</li>
-          <li>Place hands mid-chest.</li>
-          <li>Push hard and fast (about 2 inches deep).</li>
-          <li>Continue until help arrives or AED is used.</li>
-        </ol>
-
-        <div class="emergency-warning">
-          🚨 <strong>Emergency Signs:</strong> chest pain, trouble breathing, fainting,
-          stroke symptoms, seizures, or severe bleeding — call <strong>911</strong> immediately.
+          <div class="metric-card">
+            <span class="metric-label">Water Intake</span>
+            <span class="metric-value" id="waterValue">64 oz</span>
+            <div class="metric-sub">Synced from Water page later</div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Firebase + page logic (module) -->
+    <!-- ===================== BOTTOM VISUALS + TEXT ===================== -->
+    <section class="bottom-visuals">
+      <div class="container">
+        <div class="bv-card">
+          <div class="section-head">
+            <h2>CPR Quick Guide</h2>
+            <span class="tag">Education • Emergency-first</span>
+          </div>
+
+          <div class="bv-grid">
+            <figure class="bv-figure">
+              <img src="assets/cpr-hands.png" alt="CPR hand placement" loading="lazy" />
+              <figcaption>Hands placed in the center of the chest.</figcaption>
+            </figure>
+
+            <figure class="bv-figure">
+              <img src="assets/cpr-compressions.png" alt="CPR compressions" loading="lazy" />
+              <figcaption>Push hard & fast — 100–120 compressions/min.</figcaption>
+            </figure>
+          </div>
+
+          <div class="bv-text">
+            <ol class="bv-steps">
+              <li><strong>Check responsiveness</strong> (tap & shout).</li>
+              <li><strong>Call 911</strong> (or have someone call). Send for an AED if available.</li>
+              <li><strong>Hands mid-chest</strong>, arms straight.</li>
+              <li><strong>Push hard & fast</strong> (about 2 inches deep), 100–120/min.</li>
+              <li><strong>Keep going</strong> until help arrives or AED is used.</li>
+            </ol>
+
+            <div class="emergency-warning">
+              🚨 <strong>Emergency signs:</strong> chest pain, trouble breathing, fainting,
+              stroke symptoms (face droop, arm weakness, speech trouble), seizures,
+              or severe bleeding — call <strong>911</strong> immediately.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Page logic (Firebase imported inside medical.js) -->
   <script type="module" src="./medical.js"></script>
 </body>
 </html>
+
 
