@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Environmental AI + Larry Life Coach | Health Hack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Environmental AI: weather, UV index, allergies/pollen, air quality. Larry Life Coach: daily motivation boosts." />
+
+  <style>
+    :root{
+      /* Winter palette */
+      --bg0:#050A14;
+      --bg1:#070B18;
+      --panel1: rgba(10, 18, 42, .74);
+      --panel2: rgba(7, 12, 28, .72);
+      --stroke: rgba(205, 225, 255, .16);
+      --text:#EEF4FF;
+      --muted:#AAB8D6;
+
+      --ice1:#4CB6FF;
+      --ice2:#6D5EF8;
+      --mint1:#31D3B7;
+      --mint2:#A8FFEA;
+
+      --danger:#FF5D6C;
+      --warn:#FFC857;
+      --ok:#3EF0B0;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 700px at 10% 10%, rgba(76,182,255,.18), transparent 60%),
+        radial-gradient(900px 600px at 85% 15%, rgba(109,94,248,.16), transparent 55%),
+        radial-gradient(900px 650px at 30% 95%, rgba(49,211,183,.12), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    .wrap{max-width:1180px;margin:0 auto;padding:24px; animation:in .7s ease both;}
+    @keyframes in{from{opacity:0;transform:translateY(14px);filter:blur(6px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+
+    .topbar{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:14px; flex-wrap:wrap;
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-radius:22px;
+      padding:16px;
+      box-shadow: 0 18px 70px rgba(0,0,0,.55);
+    }
+    h1{margin:0 0 6px; font-size:26px;}
+    .sub{margin:0; color:var(--muted); font-weight:700;}
+
+    /* Quick Nav buttons (top right) */
+    .ai-nav{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;}
+    .ai-btn{
+      text-decoration:none;
+      color:#fff;
+      font-weight:900;
+      border-radius:999px;
+      padding:10px 14px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(10,18,45,.45);
+      box-shadow:0 12px 26px rgba(0,0,0,.35);
+      transition: transform .15s ease, filter .15s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .ai-btn:hover{transform:translateY(-2px);filter:brightness(1.06)}
+    .ai-btn.env{background: linear-gradient(135deg, var(--mint1), var(--ice1));}
+    .ai-btn.med{background: linear-gradient(135deg, #ff5f6d, #ffc371);}
+    .ai-btn.nut{background: linear-gradient(135deg, #56ab2f, #a8e063);}
+    .ai-btn.psych{background: linear-gradient(135deg, #6a11cb, #2575fc);}
+
+    .grid{display:grid; gap:18px; margin-top:18px; grid-template-columns:1fr;}
+    @media(min-width:980px){.grid{grid-template-columns:1fr 1fr;}}
+
+    .card{
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, var(--panel1), var(--panel2));
+      border-radius:22px;
+      box-shadow: 0 18px 70px rgba(0,0,0,.45);
+      padding:16px;
+      overflow:hidden;
+      position:relative;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(800px 240px at 10% 0%, rgba(255,255,255,.07), transparent 60%);
+      pointer-events:none;
+      opacity:.85;
+    }
+    .card > *{position:relative; z-index:1;}
+    h2{margin:0 0 10px;font-size:18px}
+    .small{color:var(--muted); font-size:13px; margin:0 0 10px;}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    input,button,select,textarea{
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(9,18,42,.75);
+      color:#fff;
+      padding:12px 14px;
+      font-size:15px;
+      outline:none;
+    }
+    input{flex:1; min-width:220px;}
+    button{
+      cursor:pointer; border:none; font-weight:900;
+      background: linear-gradient(180deg, var(--ice1), #357edd);
+      box-shadow:0 12px 28px rgba(0,0,0,.35);
+    }
+    button.secondary{
+      background: rgba(9,18,42,.75);
+      border:1px solid rgba(255,255,255,.14);
+      font-weight:900;
+    }
+
+    .box{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.14);
+      border-radius:18px;
+      padding:12px;
+      min-height:260px;
+      white-space:pre-wrap;
+      overflow:auto;
+    }
+
+    .kpis{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;}
+    .kpi{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.12);
+      border-radius:16px;
+      padding:12px;
+    }
+    .kpi .label{color:var(--muted); font-size:12px; font-weight:800;}
+    .kpi .val{font-size:18px; font-weight:1000; margin-top:6px;}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; font-weight:900;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color:var(--muted);
+    }
+    .ok{color:var(--ok)}
+    .warn{color:var(--warn)}
+    .danger{color:var(--danger)}
+
+    .split{display:grid; gap:14px; grid-template-columns:1fr;}
+    @media(min-width:980px){.split{grid-template-columns:1fr 1fr;}}
+
+    .foot{margin-top:10px; color:var(--muted); font-size:12px; line-height:1.4;}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="topbar">
+      <div>
+        <h1>🌎 Environmental AI + Larry Life Coach</h1>
+        <p class="sub">Live environment signals + daily motivation. Safety-first, no medical diagnosis.</p>
+      </div>
+
+      <div class="ai-nav">
+        <a class="ai-btn psych" href="/psych/psychologist.html">Psychologist AI</a>
+        <a class="ai-btn med" href="/medical/medical.html">Medical AI</a>
+        <a class="ai-btn nut" href="/meal/meal.html">Nutritionist AI</a>
+        <a class="ai-btn env" href="/environment/environment.html">Environmental AI</a>
+      </div>
+    </div>
+
+    <div class="grid">
+
+      <!-- Environmental AI -->
+      <div class="card">
+        <h2>Environmental AI</h2>
+        <p class="small">Gets your location (or you can search a city) to show: weather, UV, allergies/pollen, air quality.</p>
+
+        <div class="row">
+          <button id="btnUseLocation" class="secondary" type="button">📍 Use my location</button>
+          <input id="cityInput" placeholder="Or type a city (e.g., Frisco, TX)" />
+          <button id="btnSearchCity" type="button">Search</button>
+        </div>
+
+        <div class="row" style="margin-top:10px;">
+          <span class="pill" id="locPill">Location: not set</span>
+          <span class="pill" id="timePill">Time: —</span>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="label">Now</div><div class="val" id="kNow">—</div></div>
+          <div class="kpi"><div class="label">Temp</div><div class="val" id="kTemp">—</div></div>
+          <div class="kpi"><div class="label">UV Index</div><div class="val" id="kUV">—</div></div>
+          <div class="kpi"><div class="label">Air Quality</div><div class="val" id="kAQI">—</div></div>
+        </div>
+
+        <div class="box" id="envBox" style="margin-top:12px;">Pick a location to load your environment dashboard…</div>
+
+        <p class="foot">
+          Notes: Pollen/allergy data availability can vary by region and season. Always use official alerts for emergencies.
+        </p>
+      </div>
+
+      <!-- Larry Life Coach -->
+      <div class="card">
+        <h2>🦎 Larry, the Life Coach</h2>
+        <p class="small">
+          Larry delivers a daily boost inspired by: Carl Jung, Dr. Seuss, Aristotle, Alain de Botton, Earl Nightingale.
+          (Original motivational text — not direct quotes.)
+        </p>
+
+        <div class="row">
+          <label class="pill" for="authorSelect">Source</label>
+          <select id="authorSelect">
+            <option value="daily" selected>Daily Mix (auto)</option>
+            <option value="jung">Carl Jung</option>
+            <option value="seuss">Dr. Seuss</option>
+            <option value="aristotle">Aristotle</option>
+            <option value="debotton">Alain de Botton</option>
+            <option value="nightingale">Earl Nightingale</option>
+          </select>
+
+          <button id="btnLarry" type="button">🎤 Give me today’s boost</button>
+          <button id="btnSaveBoost" class="secondary" type="button">💾 Save</button>
+        </div>
+
+        <div class="box" id="larryBox" style="margin-top:12px;">Tap “Give me today’s boost” to hear Larry.</div>
+
+        <div class="split" style="margin-top:12px;">
+          <div class="kpi">
+            <div class="label">Saved boosts</div>
+            <div class="val" id="savedCount">0</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Today’s theme</div>
+            <div class="val" id="todayTheme">—</div>
+          </div>
+        </div>
+
+        <p class="foot">
+          Larry stays prevention-minded: routines, discipline, reflection, and small daily wins. If you’re in crisis, use local emergency resources.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script defer src="./environment.js"></script>
+</body>
+</html>
