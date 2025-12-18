@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BP Monitor | AI Medical</title>
+  <link rel="stylesheet" href="bp.css" />
+</head>
+
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">🩺</div>
+        <div>
+          <div class="title">Blood Pressure Monitor</div>
+          <div class="subtitle">AI Medical (Lupus-focused coaching, non-medical)</div>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="btn btn-ghost" id="btnExport" type="button">Export</button>
+        <button class="btn btn-ghost" id="btnImport" type="button">Import</button>
+        <input id="importFile" type="file" accept="application/json" hidden />
+        <button class="btn btn-danger" id="btnReset" type="button">Reset</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- LEFT -->
+      <section class="card">
+        <div class="card-head">
+          <h2>Record a BP reading</h2>
+          <div class="muted">Saved locally. Use consistent technique for accuracy.</div>
+        </div>
+
+        <form id="bpForm" class="form">
+          <div class="row">
+            <div class="field">
+              <label for="daySelect">Day</label>
+              <input id="daySelect" type="date" />
+              <div class="hint">Tip: track AM/PM daily for 7 days when calibrating.  [oai_citation:3‡AHA Journals](https://www.ahajournals.org/doi/10.1161/HYPERTENSIONAHA.123.21118?utm_source=chatgpt.com)</div>
+            </div>
+
+            <div class="field">
+              <label for="time">Time</label>
+              <input id="time" type="time" />
+            </div>
+
+            <div class="field">
+              <label for="context">Context</label>
+              <select id="context">
+                <option value="AM">AM (morning)</option>
+                <option value="PM">PM (evening)</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="sys">Systolic (SYS)</label>
+              <input id="sys" type="number" min="60" max="260" step="1" required placeholder="e.g., 128" />
+            </div>
+
+            <div class="field">
+              <label for="dia">Diastolic (DIA)</label>
+              <input id="dia" type="number" min="40" max="160" step="1" required placeholder="e.g., 82" />
+            </div>
+
+            <div class="field">
+              <label for="hr">Heart rate (optional)</label>
+              <input id="hr" type="number" min="30" max="220" step="1" placeholder="e.g., 76" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="position">Position</label>
+              <select id="position">
+                <option value="seated">Seated</option>
+                <option value="standing">Standing</option>
+                <option value="lying">Lying down</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="arm">Arm</label>
+              <select id="arm">
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="cuff">Cuff</label>
+              <select id="cuff">
+                <option value="upper_arm">Upper arm (recommended)</option>
+                <option value="wrist">Wrist</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="symptoms">Symptoms (optional)</label>
+              <input id="symptoms" placeholder="e.g., headache, dizziness, chest pain (seek care)" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <label for="notes">Notes (optional)</label>
+              <textarea id="notes" rows="3" placeholder="Stress, meds taken, pain flare, salt meal, etc."></textarea>
+              <div class="hint">AHA basics: avoid caffeine/exercise 30 min before, sit 5 min, no talking, correct cuff.  [oai_citation:4‡www.heart.org](https://www.heart.org/-/media/files/health-topics/high-blood-pressure/how_to_measure_your_blood_pressure_letter_size.pdf?utm_source=chatgpt.com)</div>
+            </div>
+          </div>
+
+          <div class="row actions">
+            <button class="btn btn-primary" type="submit" id="btnSave">Add reading</button>
+            <button class="btn btn-ghost" type="button" id="btnClear">Clear</button>
+          </div>
+
+          <input id="editId" type="hidden" value="" />
+        </form>
+
+        <hr class="sep" />
+
+        <div class="list-tools">
+          <div class="field">
+            <label for="search">Search</label>
+            <input id="search" placeholder="Search notes/symptoms..." />
+          </div>
+
+          <div class="field">
+            <label for="range">Range</label>
+            <select id="range">
+              <option value="day">Selected day</option>
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="bpList" class="list"></div>
+      </section>
+
+      <!-- RIGHT -->
+      <aside class="stack">
+        <section class="card">
+          <div class="card-head">
+            <h2>Summary</h2>
+            <div class="muted" id="summaryLabel">—</div>
+          </div>
+
+          <div class="pill-grid">
+            <div class="pill-card">
+              <div class="pill-title">Avg SYS</div>
+              <div class="pill-value" id="avgSys">—</div>
+              <div class="pill-sub" id="nReadings">Readings: —</div>
+            </div>
+            <div class="pill-card">
+              <div class="pill-title">Avg DIA</div>
+              <div class="pill-value" id="avgDia">—</div>
+              <div class="pill-sub" id="avgHr">Avg HR: —</div>
+            </div>
+          </div>
+
+          <div class="mini">
+            <div class="mini-row"><span>Min / Max SYS</span><strong id="minMaxSys">—</strong></div>
+            <div class="mini-row"><span>Min / Max DIA</span><strong id="minMaxDia">—</strong></div>
+            <div class="mini-row"><span>Flagged readings</span><strong id="flagCount">—</strong></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Lupus BP goals</h2>
+            <div class="muted">Set your clinician-approved target. Many discuss <130/80.  [oai_citation:5‡BMJ ArD](https://ard.bmj.com/content/81/6/768?utm_source=chatgpt.com)</div>
+          </div>
+
+          <div class="form compact">
+            <div class="row">
+              <div class="field">
+                <label for="targetSys">Target SYS</label>
+                <input id="targetSys" type="number" min="80" max="200" step="1" placeholder="e.g., 130" />
+              </div>
+              <div class="field">
+                <label for="targetDia">Target DIA</label>
+                <input id="targetDia" type="number" min="40" max="130" step="1" placeholder="e.g., 80" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="field">
+                <label for="alertSys">Alert SYS (urgent)</label>
+                <input id="alertSys" type="number" min="120" max="260" step="1" placeholder="e.g., 180" />
+              </div>
+              <div class="field">
+                <label for="alertDia">Alert DIA (urgent)</label>
+                <input id="alertDia" type="number" min="80" max="160" step="1" placeholder="e.g., 120" />
+              </div>
+            </div>
+
+            <div class="row actions">
+              <button class="btn btn-primary" id="btnSaveGoals" type="button">Save goals</button>
+              <button class="btn btn-ghost" id="btnDefaultGoals" type="button">Set defaults</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>AI Coach</h2>
+            <div class="muted">Pattern detection + next-step coaching (non-medical).</div>
+          </div>
+
+          <div class="coach">
+            <div class="coach-row">
+              <button class="btn btn-primary" id="btnCoach" type="button">Run coach</button>
+              <button class="btn btn-ghost" id="btnCoach7" type="button">7-day report</button>
+            </div>
+
+            <div class="coach-out" id="coachOut">
+              <div class="empty">Add a few readings, then run coaching.</div>
+            </div>
+
+            <div class="disclaimer">
+              Not medical advice. If you have very high BP or severe symptoms, seek urgent care.
+              Home BP monitoring supports care but doesn’t replace clinician visits.  [oai_citation:6‡www.heart.org](https://www.heart.org/en/health-topics/high-blood-pressure/understanding-blood-pressure-readings/monitoring-your-blood-pressure-at-home?utm_source=chatgpt.com)
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script src="bp.js" defer></script>
+</body>
+</html>
