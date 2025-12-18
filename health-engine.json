@@ -1,0 +1,120 @@
+{
+  "engine": {
+    "name": "LifeHack Health Engine",
+    "version": "1.0.0",
+    "mode": "local-first",
+    "offline": true,
+    "lastUpdated": "2025-12-17"
+  },
+
+  "safety": {
+    "medicalDisclaimer": true,
+    "diagnosisAllowed": false,
+    "emergencyBypass": true,
+    "emergencyKeywords": [
+      "chest pain",
+      "shortness of breath",
+      "fainting",
+      "stroke",
+      "seizure",
+      "very high blood pressure"
+    ]
+  },
+
+  "modules": {
+    "meal": {
+      "id": "meal",
+      "name": "AI Nutritionist",
+      "type": "health",
+      "path": "/meal/meal.html",
+      "assets": [
+        "/meal/meal.css",
+        "/meal/meal.js",
+        "/meal/nutrition-rules.json"
+      ],
+      "storage": {
+        "localStorageKey": "mealLog.meals.v1"
+      },
+      "aiScope": [
+        "nutrition",
+        "macros",
+        "pattern-detection",
+        "non-medical"
+      ],
+      "enabled": true
+    },
+
+    "bp": {
+      "id": "bp",
+      "name": "Blood Pressure Monitor",
+      "type": "medical",
+      "path": "/bp/bp.html",
+      "assets": [
+        "/bp/bp.css",
+        "/bp/bp.js",
+        "/bp/bp-rules.json"
+      ],
+      "storage": {
+        "localStorageKey": "bpLog.readings.v1"
+      },
+      "aiScope": [
+        "blood-pressure",
+        "trend-analysis",
+        "lupus-risk-awareness",
+        "non-diagnostic"
+      ],
+      "enabled": true
+    },
+
+    "ask-ai": {
+      "id": "ask-ai",
+      "name": "Ask AI",
+      "type": "assistant",
+      "path": "/ask-ai.html",
+      "assets": [
+        "/ask-ai.js",
+        "/ai-profiles.json"
+      ],
+      "aiScope": [
+        "general-health",
+        "education",
+        "navigation"
+      ],
+      "enabled": true
+    }
+  },
+
+  "routing": {
+    "defaultModule": "meal",
+    "routes": {
+      "/": "/index.html",
+      "/meal": "/meal/meal.html",
+      "/bp": "/bp/bp.html",
+      "/ask-ai": "/ask-ai.html"
+    }
+  },
+
+  "cache": {
+    "strategy": "cache-first",
+    "version": "health-cache-v1",
+    "core": [
+      "/",
+      "/index.html",
+      "/style.css",
+      "/script.js",
+      "/health-engine.json"
+    ],
+    "dynamic": [
+      "/meal/",
+      "/bp/",
+      "/ask-ai"
+    ]
+  },
+
+  "uv": {
+    "boot": true,
+    "autoRegisterModules": true,
+    "exposeState": true,
+    "logLevel": "info"
+  }
+}
