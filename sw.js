@@ -1,271 +1,188 @@
-/* ============================================================
-   sw.js — LifeHack Health Engine Service Worker
-   Uses /health-engine.json (YOUR schema)
-   ============================================================ */
+/* =========================================================
+   Health-Hack Service Worker (PWA) — Engine-driven caching
+   - Reads /health-engine.json
+   - Caches core + enabled module assets
+   - Cache-first for static, network-first for HTML navigations
+   - Safe for GitHub Pages subpath (e.g. /Health-Hack/)
+========================================================= */
 
-const ENGINE_URL = "/health-engine.json";
+const SW_VERSION = "hh-sw-v1.0.0";
+const ENGINE_URL = "./health-engine.json"; // relative to SW scope (root)
+const CORE_FALLBACK = [
+  "./",
+  "./index.html",
+  "./style.css",
+  "./script.js",
+  "./app.js",
+  "./uv.js",
+  "./health-engine.json"
+];
 
-let ENGINE = null;
-let CACHE_NAME = "health-cache-v1"; // fallback
-let PRECACHE = [];
-let DYNAMIC_PREFIXES = [];
-let STRATEGY = "cache-first";
-let OFFLINE_FALLBACK = "/index.html";
-
-/* -----------------------------
-   Helpers
------------------------------- */
+// --- helpers ---
 const log = (...a) => console.log("[SW]", ...a);
-const warn = (...a) => console.warn("[SW]", ...a);
 
-function isNavigationRequest(request) {
-  return request.mode === "navigate" ||
-    (request.headers.get("accept") || "").includes("text/html");
-}
-
-function uniq(arr) {
-  return [...new Set((arr || []).filter(Boolean))];
-}
-
-function moduleList(modulesObj) {
-  return Object.values(modulesObj || {}).filter(Boolean);
-}
-
-async function loadEngine() {
+function sameOrigin(reqUrl) {
   try {
-    const res = await fetch(ENGINE_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-    ENGINE = await res.json();
-  } catch (e) {
-    warn("Failed to load health-engine.json; using fallback config.", e.message);
-    ENGINE = {
-      engine: { offline: true },
-      cache: {
-        strategy: "cache-first",
-        version: "health-cache-v1",
-        core: ["/", "/index.html", "/style.css", "/script.js", "/health-engine.json"],
-        dynamic: ["/"]
-      },
-      routing: { routes: { "/": "/index.html" } },
-      modules: {}
-    };
+    const u = new URL(reqUrl);
+    return u.origin === self.location.origin;
+  } catch {
+    return false;
+  }
+}
+
+function isHTMLRequest(req) {
+  const accept = req.headers.get("accept") || "";
+  return req.mode === "navigate" || accept.includes("text/html");
+}
+
+function normalizePath(p) {
+  // ensure it starts with "./" (cache keys consistent in GH Pages)
+  if (!p) return null;
+  if (p.startsWith("http")) return p;
+  if (p.startsWith("/")) return "." + p;
+  if (p.startsWith("./")) return p;
+  return "./" + p;
+}
+
+async function fetchEngine() {
+  const res = await fetch(ENGINE_URL, { cache: "no-store" });
+  if (!res.ok) throw new Error("health-engine.json fetch failed");
+  return res.json();
+}
+
+function collectEngineAssets(engineJson) {
+  const assets = new Set();
+
+  // core
+  (engineJson?.cache?.core || []).forEach((p) => assets.add(normalizePath(p)));
+  (engineJson?.cache?.dynamic || []).forEach((p) => assets.add(normalizePath(p)));
+
+  // modules
+  const modules = engineJson?.modules || {};
+  for (const key of Object.keys(modules)) {
+    const m = modules[key];
+    if (!m || m.enabled === false) continue;
+
+    if (m.path) assets.add(normalizePath(m.path));
+    (m.assets || []).forEach((p) => assets.add(normalizePath(p)));
   }
 
-  STRATEGY = ENGINE.cache?.strategy || "cache-first";
-  CACHE_NAME = ENGINE.cache?.version || "health-cache-v1";
-  DYNAMIC_PREFIXES = ENGINE.cache?.dynamic || [];
+  // fallback essentials
+  CORE_FALLBACK.forEach((p) => assets.add(normalizePath(p)));
 
-  // Optional override if you add it later:
-  OFFLINE_FALLBACK = ENGINE.cache?.offlineFallback || "/index.html";
-
-  // Build precache list:
-  // - cache.core
-  // - enabled module paths + assets
-  // - routing targets
-  const precacheSet = new Set([...(ENGINE.cache?.core || [])]);
-
-  // Modules: add module.path + module.assets
-  moduleList(ENGINE.modules).forEach((m) => {
-    if (m.enabled === false) return;
-    if (m.path) precacheSet.add(m.path);
-    (m.assets || []).forEach((a) => precacheSet.add(a));
-  });
-
-  // Routing: add all route targets
-  const routes = ENGINE.routing?.routes || {};
-  Object.values(routes).forEach((target) => precacheSet.add(target));
-
-  // Ensure engine file is cached too
-  precacheSet.add("/health-engine.json");
-
-  PRECACHE = uniq([...precacheSet]);
-
-  log("Engine loaded:", { CACHE_NAME, STRATEGY, PRECACHE_COUNT: PRECACHE.length, DYNAMIC_PREFIXES });
+  // clean nulls
+  return Array.from(assets).filter(Boolean);
 }
 
-/* -----------------------------
-   Install
------------------------------- */
+async function precacheAll() {
+  let assets = [...CORE_FALLBACK];
+
+  try {
+    const engine = await fetchEngine();
+    assets = collectEngineAssets(engine);
+    log("Engine precache assets:", assets);
+  } catch (e) {
+    log("Engine load failed, using CORE_FALLBACK only.", e);
+    assets = CORE_FALLBACK.map(normalizePath);
+  }
+
+  const cache = await caches.open(SW_VERSION);
+  await cache.addAll(assets);
+  return assets.length;
+}
+
+// --- lifecycle ---
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
-      await loadEngine();
-
-      const cache = await caches.open(CACHE_NAME);
-      await cache.addAll(PRECACHE);
-
-      log("Installed + precached:", PRECACHE.length, "files");
+      const count = await precacheAll();
+      log("Installed. Cached items:", count);
       self.skipWaiting();
     })()
   );
 });
 
-/* -----------------------------
-   Activate
------------------------------- */
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
-      // Ensure engine is loaded for this SW instance
-      if (!ENGINE) await loadEngine();
-
       const keys = await caches.keys();
       await Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            log("Deleting old cache:", key);
-            return caches.delete(key);
-          }
-        })
+        keys.map((k) => (k === SW_VERSION ? null : caches.delete(k)))
       );
-
       await self.clients.claim();
-      log("Activated");
+      log("Activated. Old caches cleared.");
     })()
   );
 });
 
-/* -----------------------------
-   Fetch Strategies
------------------------------- */
-async function cacheFirst(request) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
-  if (cached) return cached;
-
-  const res = await fetch(request);
-  if (res && res.ok) await maybePutRuntime(cache, request, res.clone());
-  return res;
-}
-
-async function networkFirst(request) {
-  const cache = await caches.open(CACHE_NAME);
-  try {
-    const res = await fetch(request);
-    if (res && res.ok) await maybePutRuntime(cache, request, res.clone());
-    return res;
-  } catch {
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    throw new Error("network-first: offline and not cached");
-  }
-}
-
-async function staleWhileRevalidate(request) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
-
-  const fetchPromise = fetch(request)
-    .then(async (res) => {
-      if (res && res.ok) await maybePutRuntime(cache, request, res.clone());
-      return res;
-    })
-    .catch(() => null);
-
-  return cached || (await fetchPromise) || Promise.reject(new Error("swr: offline and not cached"));
-}
-
-/* -----------------------------
-   Runtime caching rules
-   - Always cache if request is under dynamic prefixes
-   - Also cache same-origin GETs for assets (css/js/json/images)
------------------------------- */
-function urlPath(url) {
-  try { return new URL(url).pathname; } catch { return url; }
-}
-
-function shouldRuntimeCache(request) {
-  const url = new URL(request.url);
-
-  // Only cache same-origin
-  if (url.origin !== self.location.origin) return false;
-
-  const path = url.pathname;
-
-  // Dynamic prefix match
-  if (Array.isArray(DYNAMIC_PREFIXES) && DYNAMIC_PREFIXES.some((p) => path.startsWith(p))) {
-    return true;
-  }
-
-  // Typical static assets
-  return (
-    path.endsWith(".css") ||
-    path.endsWith(".js") ||
-    path.endsWith(".json") ||
-    path.endsWith(".png") ||
-    path.endsWith(".jpg") ||
-    path.endsWith(".jpeg") ||
-    path.endsWith(".webp") ||
-    path.endsWith(".svg") ||
-    path.endsWith(".ico") ||
-    path.endsWith(".woff2")
-  );
-}
-
-async function maybePutRuntime(cache, request, response) {
-  if (!shouldRuntimeCache(request)) return;
-  await cache.put(request, response);
-}
-
-/* -----------------------------
-   Fetch Handler
------------------------------- */
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-
-  if (request.method !== "GET") return;
-
-  event.respondWith(
-    (async () => {
-      // If engine hasn't loaded yet, attempt it (don’t block too long)
-      if (!ENGINE) {
-        try { await loadEngine(); } catch {}
-      }
-
-      try {
-        // Navigation: keep it resilient offline
-        if (isNavigationRequest(request)) {
-          // Prefer strategy for HTML too, but always provide fallback
-          let res;
-          if (STRATEGY === "network-first") res = await networkFirst(request);
-          else if (STRATEGY === "stale-while-revalidate") res = await staleWhileRevalidate(request);
-          else res = await cacheFirst(request);
-
-          return res;
-        }
-
-        // Assets / API / JSON
-        if (STRATEGY === "network-first") return await networkFirst(request);
-        if (STRATEGY === "stale-while-revalidate") return await staleWhileRevalidate(request);
-        return await cacheFirst(request);
-      } catch (e) {
-        // Offline fallback for navigation
-        if (isNavigationRequest(request)) {
-          const cache = await caches.open(CACHE_NAME);
-          const fallback = await cache.match(OFFLINE_FALLBACK) || await cache.match("/index.html");
-          if (fallback) return fallback;
-        }
-        throw e;
-      }
-    })()
-  );
-});
-
-/* -----------------------------
-   Messages
------------------------------- */
+// optional: allow page to tell SW to refresh cache after updates
 self.addEventListener("message", (event) => {
-  if (event.data === "SKIP_WAITING") self.skipWaiting();
-
-  // Optional: allow manual cache refresh
-  if (event.data === "UV_REFRESH_ENGINE") {
+  const msg = event.data || {};
+  if (msg.type === "SW_REFRESH_CACHE") {
     event.waitUntil(
       (async () => {
-        await loadEngine();
-        const cache = await caches.open(CACHE_NAME);
-        await cache.addAll(PRECACHE);
-        log("Engine refreshed + cache warmed.");
+        log("Refreshing cache by request…");
+        await caches.delete(SW_VERSION);
+        await precacheAll();
+        log("Cache refreshed.");
       })()
     );
   }
+});
+
+// --- fetch strategies ---
+async function cacheFirst(req) {
+  const cache = await caches.open(SW_VERSION);
+  const cached = await cache.match(req, { ignoreSearch: true });
+  if (cached) return cached;
+
+  const res = await fetch(req);
+  // only cache same-origin GETs
+  if (req.method === "GET" && sameOrigin(req.url) && res.ok) {
+    cache.put(req, res.clone());
+  }
+  return res;
+}
+
+async function networkFirstHTML(req) {
+  const cache = await caches.open(SW_VERSION);
+
+  try {
+    const res = await fetch(req);
+    if (req.method === "GET" && sameOrigin(req.url) && res.ok) {
+      cache.put(req, res.clone());
+    }
+    return res;
+  } catch {
+    // fallback to cached page or index
+    const cached = await cache.match(req, { ignoreSearch: true });
+    if (cached) return cached;
+
+    const fallback = await cache.match("./index.html");
+    if (fallback) return fallback;
+
+    return new Response("Offline", {
+      status: 503,
+      headers: { "Content-Type": "text/plain" }
+    });
+  }
+}
+
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
+
+  // only handle GET
+  if (req.method !== "GET") return;
+
+  // only same-origin (keeps SW from messing with CDNs)
+  if (!sameOrigin(req.url)) return;
+
+  // HTML navigations should be network-first so updates show
+  if (isHTMLRequest(req)) {
+    event.respondWith(networkFirstHTML(req));
+    return;
+  }
+
+  // everything else: cache-first
+  event.respondWith(cacheFirst(req));
 });
