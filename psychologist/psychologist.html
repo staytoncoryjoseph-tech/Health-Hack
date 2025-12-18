@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Psychologist AI | Health Hack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Psychologist AI for education, coping tools, and prevention-focused mental wellness support. Not a therapist." />
+
+  <style>
+    :root{
+      --bg:#060a14;
+      --card:#0b1430;
+      --card2:#070d1b;
+      --border:rgba(140,160,220,.15);
+      --text:#e9ecf1;
+      --muted:#9aa4c7;
+      --danger:#ff6b6b;
+      --warn:#ffcc66;
+      --ok:#43d19e;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .container{max-width:1100px;margin:auto;padding:24px}
+    h1,h2,h3{margin:0 0 10px}
+    p{color:var(--muted); margin:0 0 14px}
+    .grid{display:grid;gap:20px;grid-template-columns:1fr}
+    @media(min-width:900px){.grid{grid-template-columns:1.2fr .8fr}}
+
+    .card{
+      background:linear-gradient(180deg,var(--card),var(--card2));
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:20px;
+    }
+
+    /* ================= AI QUICK NAV (TOP RIGHT) ================= */
+    .ai-nav{
+      position:fixed;
+      top:14px;
+      right:16px;
+      display:flex;
+      gap:10px;
+      z-index:9999;
+    }
+    .ai-btn{
+      padding:10px 16px;
+      border-radius:999px;
+      font-size:14px;
+      font-weight:800;
+      text-decoration:none;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(10,18,45,.55);
+      backdrop-filter: blur(10px);
+      box-shadow:0 10px 28px rgba(0,0,0,.45);
+      transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+      white-space:nowrap;
+    }
+    .ai-btn:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(0,0,0,.55);filter:brightness(1.05)}
+    .ai-btn:active{transform:translateY(0)}
+    .ai-btn.medical{background:linear-gradient(135deg,#ff5f6d,#ffc371)}
+    .ai-btn.nutrition{background:linear-gradient(135deg,#56ab2f,#a8e063)}
+    .ai-btn.psych{background:linear-gradient(135deg,#6a11cb,#2575fc)}
+    @media(max-width:640px){
+      .ai-nav{top:auto;bottom:14px;right:50%;transform:translateX(50%);flex-wrap:wrap;justify-content:center}
+    }
+
+    .disclaimer{
+      border-left:4px solid var(--danger);
+      padding:14px 16px;
+      background:rgba(255,107,107,.08);
+      border-radius:14px;
+      margin: 14px 0 16px;
+      font-size:14px;
+    }
+    .badgebar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin: 12px 0 16px}
+    .badge{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      background:rgba(106,17,203,.10);
+    }
+
+    select,input,button,textarea{
+      background:#0b1430;
+      color:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:15px;
+      outline:none;
+    }
+    textarea{width:100%;min-height:86px;resize:vertical;line-height:1.4}
+    button{
+      cursor:pointer;
+      background:linear-gradient(180deg,#4da3ff,#357edd);
+      border:none;
+      font-weight:800;
+    }
+    button.secondary{
+      background:#0b1430;
+      border:1px solid var(--border);
+      font-weight:800;
+    }
+
+    .chat-box{display:flex;flex-direction:column;height:440px}
+    .messages{flex:1;overflow-y:auto;padding-right:6px}
+    .msg{margin-bottom:14px;line-height:1.45;white-space:pre-wrap}
+    .user{color:#fff}
+    .ai{color:#b7d6ff}
+    .system{color:var(--muted); font-size:13px}
+    .input-row{display:flex;gap:10px;margin-top:12px}
+    .input-row input{flex:1}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .small{font-size:13px;color:var(--muted)}
+    .hr{border-top:1px solid var(--border); margin:18px 0}
+
+    .tipcard{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      background:rgba(255,255,255,.03);
+      margin-top:10px;
+    }
+    .tips{margin:0; padding-left:18px; color:var(--muted)}
+    .tips li{margin:6px 0}
+
+    .flag{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,204,102,.08);
+      color:var(--warn);
+    }
+
+    .score{
+      display:flex; align-items:baseline; gap:10px;
+      padding:10px 12px; border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.03);
+      margin-top:10px;
+    }
+    .score strong{font-size:20px}
+    .ok{color:var(--ok)}
+    .warn{color:var(--warn)}
+    .danger{color:var(--danger)}
+
+    .mini-btn{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:#fff;
+      font-size:12px;
+      cursor:pointer;
+      margin-left:8px;
+    }
+    .mini-btn:hover{filter:brightness(1.08)}
+  </style>
+</head>
+
+<body>
+
+  <!-- ================= AI QUICK NAV (Correct for /Health-Hack/) ================= -->
+  <div class="ai-nav">
+    <a href="/Health-Hack/medical/medical.html" class="ai-btn medical">Medical AI</a>
+    <a href="/Health-Hack/meal/meal.html" class="ai-btn nutrition">Nutritionist AI</a>
+    <a href="/Health-Hack/psych/psychologist.html" class="ai-btn psych">Psychologist AI</a>
+  </div>
+
+  <div class="container">
+    <h1>🧠 Psychologist AI</h1>
+    <p>Mental wellness support, coping tools, and prevention — <strong>not a therapist</strong>.</p>
+
+    <div class="badgebar">
+      <span class="badge">Local-first • No Firebase</span>
+      <span class="badge">PQ-4 Quick Screen</span>
+      <span class="badge">Crisis-safe escalation</span>
+      <span class="badge">Coping toolkit</span>
+    </div>
+
+    <div class="disclaimer">
+      <strong>Important Disclaimer:</strong><br>
+      This Psychologist AI is <strong>not a licensed therapist</strong> and does not provide diagnosis or emergency services.
+      If you feel like you might hurt yourself or someone else, call <strong>911</strong> now.
+      In the U.S., you can call or text <strong>988</strong> for the Suicide & Crisis Lifeline.
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: CHAT -->
+      <div class="card">
+        <h2>Psychologist AI Chat</h2>
+        <p class="small">Talk it out. I’ll respond with coping tools, reflection questions, and safe next steps.</p>
+
+        <div class="chat-box">
+          <div class="messages" id="messages"></div>
+
+          <div class="input-row">
+            <input id="userInput" placeholder="What’s going on today?" />
+            <button id="btnAsk" type="button">Send</button>
+          </div>
+
+          <div class="row" style="margin-top:10px; justify-content:space-between;">
+            <button id="btnClearChat" class="secondary" type="button">Clear Chat</button>
+            <span id="modeFlag" class="flag" title="Current focus">Focus: Support</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: PQ-4 + TOOLS -->
+      <div class="card">
+        <h2>PQ-4 Quick Check</h2>
+        <p class="small">Over the last 2 weeks, how often have you been bothered by the following?</p>
+
+        <div class="tipcard">
+          <div class="row" style="justify-content:space-between;">
+            <label for="pq1">1) Feeling nervous, anxious, or on edge</label>
+            <select id="pq1">
+              <option value="0">Not at all</option>
+              <option value="1">Several days</option>
+              <option value="2">More than half the days</option>
+              <option value="3">Nearly every day</option>
+            </select>
+          </div>
+
+          <div class="row" style="justify-content:space-between; margin-top:10px;">
+            <label for="pq2">2) Not being able to stop or control worrying</label>
+            <select id="pq2">
+              <option value="0">Not at all</option>
+              <option value="1">Several days</option>
+              <option value="2">More than half the days</option>
+              <option value="3">Nearly every day</option>
+            </select>
+          </div>
+
+          <div class="row" style="justify-content:space-between; margin-top:10px;">
+            <label for="pq3">3) Little interest or pleasure in doing things</label>
+            <select id="pq3">
+              <option value="0">Not at all</option>
+              <option value="1">Several days</option>
+              <option value="2">More than half the days</option>
+              <option value="3">Nearly every day</option>
+            </select>
+          </div>
+
+          <div class="row" style="justify-content:space-between; margin-top:10px;">
+            <label for="pq4">4) Feeling down, depressed, or hopeless</label>
+            <select id="pq4">
+              <option value="0">Not at all</option>
+              <option value="1">Several days</option>
+              <option value="2">More than half the days</option>
+              <option value="3">Nearly every day</option>
+            </select>
+          </div>
+
+          <div class="row" style="margin-top:12px;">
+            <button id="btnScorePQ4" class="secondary" type="button">Score PQ-4</button>
+            <button id="btnResetPQ4" class="secondary" type="button">Reset</button>
+          </div>
+
+          <div class="score" id="pqScoreBox" style="display:none;">
+            <strong id="pqScore">0</strong>
+            <span id="pqInterpretation" class="small"></span>
+          </div>
+
+          <p class="small" id="pqNote" style="margin-top:10px;"></p>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2>Coping Toolkit</h2>
+        <p class="small">Fast tools that work when your brain is loud.</p>
+
+        <div class="row">
+          <button id="btnBreathing" class="secondary" type="button">2-Minute Breathing</button>
+          <button id="btnGrounding" class="secondary" type="button">5-4-3-2-1 Grounding</button>
+          <button id="btnReframe" class="secondary" type="button">Thought Reframe</button>
+        </div>
+
+        <div class="tipcard">
+          <h3 id="toolTitle">Tool Output</h3>
+          <ul class="tips" id="toolList"></ul>
+          <p class="small" id="toolNote" style="margin-top:10px;"></p>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2>Daily Check-In</h2>
+        <p class="small">Log a quick mood + note. Stored only on this device.</p>
+
+        <div class="row">
+          <label class="small" for="moodSelect">Mood</label>
+          <select id="moodSelect">
+            <option value="Great">Great</option>
+            <option value="Okay">Okay</option>
+            <option value="Stressed">Stressed</option>
+            <option value="Anxious">Anxious</option>
+            <option value="Down">Down</option>
+          </select>
+        </div>
+
+        <div class="input-row">
+          <input id="moodNote" placeholder="One sentence about today…" />
+          <button id="btnSaveMood" class="secondary" type="button">Save</button>
+        </div>
+
+        <div class="tipcard">
+          <h3>Recent Check-Ins</h3>
+          <ul class="tips" id="moodList"></ul>
+          <p class="small">Tip: trends matter more than one bad day.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script defer src="./psychologist.js"></script>
+</body>
+</html>
