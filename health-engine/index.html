@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Health Hack — Lupus (SLE) Support</title>
+  <meta name="description" content="Health Hack: a Lupus (SLE) companion for meals, hydration, blood pressure, mindset, flare support, and AI guidance — plus a Sun/UV tracker." />
+
+  <style>
+    /* =========================================================
+       HEALTH HACK — TOP TIER UI (LUPUS EDITION)
+       - your original layout preserved
+       - premium glass + glow + micro motion
+       - uv tracker integrated
+    ========================================================= */
+
+    :root{
+      --bg:#0b1020;
+      --bg2:#0f1733;
+
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.09);
+      --border:rgba(255,255,255,.14);
+      --border2:rgba(255,255,255,.22);
+
+      --text:#eaf0ff;
+      --muted:rgba(234,240,255,.72);
+      --faint:rgba(234,240,255,.48);
+
+      --blue:#2b6ff0;
+      --blue2:#5aa0ff;
+      --green:#29d391;
+      --amber:#ffd166;
+      --red:#ff5d6c;
+
+      --shadow: 0 18px 45px rgba(0,0,0,.45);
+      --shadow2: 0 28px 80px rgba(0,0,0,.55);
+
+      --radius:18px;
+      --radius2:22px;
+
+      --ease-out: cubic-bezier(.16, 1, .3, 1);
+      --spring: cubic-bezier(.22, 1.2, .36, 1);
+      --dur1: 120ms;
+      --dur2: 180ms;
+      --dur3: 260ms;
+      --dur4: 420ms;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 800px at 10% 10%, rgba(43,111,240,.22), transparent 55%),
+        radial-gradient(900px 700px at 85% 20%, rgba(41,211,145,.18), transparent 50%),
+        radial-gradient(900px 700px at 45% 90%, rgba(255,209,102,.12), transparent 55%),
+        linear-gradient(180deg, var(--bg), #060916);
+      color:var(--text);
+      overflow-x:hidden;
+
+      animation: bgShimmer 10s var(--ease-out) infinite;
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1120px;margin:0 auto;padding:24px}
+
+    /* Motion safety */
+    @media (prefers-reduced-motion: reduce){
+      *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior:auto !important; }
+    }
+
+    @keyframes bgShimmer {
+      0%   { filter: hue-rotate(0deg) saturate(1); }
+      50%  { filter: hue-rotate(8deg) saturate(1.06); }
+      100% { filter: hue-rotate(0deg) saturate(1); }
+    }
+
+    /* --- NAV --- */
+    .nav{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
+      position:sticky;top:0;z-index:40;
+      padding:14px 16px;margin:-24px -24px 22px;
+      background: linear-gradient(180deg, rgba(11,16,32,.92), rgba(11,16,32,.55));
+      backdrop-filter: blur(14px);
+      border-bottom:1px solid rgba(255,255,255,.08);
+
+      transform: translateY(-6px);
+      opacity: 0;
+      animation: pageIn var(--dur4) var(--ease-out) forwards;
+      animation-delay: 40ms;
+    }
+    @keyframes pageIn{
+      from{opacity:0; transform: translateY(10px) scale(.99);}
+      to{opacity:1; transform: translateY(0) scale(1);}
+    }
+
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:44px;height:44px;border-radius:14px;
+      background: radial-gradient(circle at 30% 30%, rgba(90,160,255,.9), rgba(43,111,240,.25));
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow: 0 14px 28px rgba(43,111,240,.18);
+      display:grid;place-items:center;
+      font-weight:900;
+    }
+    .brand h1{font-size:16px;margin:0;letter-spacing:.2px}
+    .brand p{margin:0;color:var(--muted);font-size:12px}
+    .navActions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+
+    /* --- BUTTONS --- */
+    .btn{
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 14px;border-radius:999px;
+      font-weight:800;letter-spacing:.2px;
+      cursor:pointer;
+      transition:
+        transform var(--dur2) var(--spring),
+        background var(--dur2) var(--ease-out),
+        border-color var(--dur2) var(--ease-out),
+        box-shadow var(--dur2) var(--ease-out),
+        filter var(--dur2) var(--ease-out);
+      user-select:none;
+      will-change: transform;
+    }
+    .btn:hover{
+      transform:translateY(-2px);
+      background:rgba(255,255,255,.10);
+      border-color:rgba(255,255,255,.22);
+      filter: brightness(1.05);
+    }
+    .btn:active{transform:translateY(0) scale(.985)}
+    .btnPrimary{
+      background: linear-gradient(180deg, rgba(43,111,240,.95), rgba(43,111,240,.72));
+      border-color: rgba(90,160,255,.55);
+      box-shadow: 0 18px 40px rgba(43,111,240,.25);
+      animation: pulseGlow 2.8s var(--ease-out) infinite;
+    }
+    .btnPrimary:hover{
+      box-shadow: 0 24px 60px rgba(43,111,240,.42);
+      background: linear-gradient(180deg, rgba(90,160,255,.98), rgba(43,111,240,.80));
+    }
+    @keyframes pulseGlow{
+      0%{ box-shadow: 0 18px 40px rgba(43,111,240,.25); }
+      50%{ box-shadow: 0 24px 70px rgba(43,111,240,.45); }
+      100%{ box-shadow: 0 18px 40px rgba(43,111,240,.25); }
+    }
+
+    /* --- LAYOUT --- */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:18px;
+      align-items:start;
+      animation: pageIn var(--dur4) var(--ease-out) both;
+      animation-delay: 70ms;
+    }
+    @media (max-width: 920px){ .grid{grid-template-columns:1fr} }
+
+    .hero{
+      border:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      padding:22px;
+      position:relative;
+      overflow:hidden;
+      transition: transform var(--dur3) var(--ease-out), box-shadow var(--dur3) var(--ease-out), border-color var(--dur3) var(--ease-out);
+    }
+    .hero:hover{
+      transform: translateY(-3px);
+      box-shadow: var(--shadow2);
+      border-color: rgba(255,255,255,.18);
+    }
+    .hero:before{
+      content:"";
+      position:absolute;inset:-2px;
+      background:
+        radial-gradient(700px 350px at 10% 0%, rgba(90,160,255,.22), transparent 55%),
+        radial-gradient(650px 350px at 85% 35%, rgba(41,211,145,.16), transparent 55%);
+      pointer-events:none;
+    }
+    .heroInner{position:relative}
+
+    .kicker{
+      display:inline-flex;gap:10px;align-items:center;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      padding:8px 12px;border-radius:999px;
+      font-weight:900;font-size:12px;color:rgba(234,240,255,.92);
+      letter-spacing:.35px;text-transform:uppercase;
+    }
+    .kdot{
+      width:8px;height:8px;border-radius:99px;background:var(--green);
+      box-shadow:0 0 0 6px rgba(41,211,145,.12)
+    }
+
+    .title{
+      font-size:44px;line-height:1.02;margin:14px 0 10px;
+      letter-spacing:-.8px;
+      background: linear-gradient(90deg, rgba(234,240,255,.98), rgba(90,160,255,.92));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .subtitle{
+      color:var(--muted);
+      font-size:16px;line-height:1.6;margin:0 0 18px;
+      max-width: 62ch;
+    }
+    .ctaRow{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+    .mini{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.55;
+      margin-top:12px
+    }
+
+    .panel{
+      border:1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(15,23,51,.75), rgba(15,23,51,.42));
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      padding:18px;
+      transition: transform var(--dur3) var(--ease-out), box-shadow var(--dur3) var(--ease-out);
+    }
+    .panel:hover{ transform: translateY(-2px); box-shadow: var(--shadow2); }
+    .panel h2{margin:0 0 10px;font-size:18px;letter-spacing:.2px}
+
+    .statRow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    .stat{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      border-radius:16px;
+      padding:12px;
+    }
+    .stat b{display:block;font-size:22px}
+    .stat span{color:var(--muted);font-size:12px}
+
+    .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}
+    @media (max-width: 680px){ .cards{grid-template-columns:1fr} }
+
+    .card{
+      border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      padding:16px;
+      box-shadow: 0 14px 32px rgba(0,0,0,.28);
+      transition:
+        transform var(--dur3) var(--ease-out),
+        box-shadow var(--dur3) var(--ease-out),
+        border-color var(--dur3) var(--ease-out);
+    }
+    .card:hover{
+      transform: translateY(-3px);
+      box-shadow: 0 20px 60px rgba(0,0,0,.50);
+      border-color: rgba(255,255,255,.18);
+    }
+
+    .cardTop{display:flex;gap:12px;align-items:flex-start}
+    .icon{
+      width:42px;height:42px;border-radius:14px;
+      display:grid;place-items:center;
+      background: rgba(90,160,255,.14);
+      border:1px solid rgba(90,160,255,.25);
+      font-size:18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .icon::after{
+      content:"";
+      position:absolute;
+      top:-40%;
+      left:-60%;
+      width:40%;
+      height:180%;
+      transform: rotate(18deg);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.20), transparent);
+      animation: sheenSweep 3.2s var(--ease-out) infinite;
+    }
+    @keyframes sheenSweep{
+      0% { left:-60%; opacity:0; }
+      12%{ opacity:1; }
+      50%{ left:120%; opacity:.8; }
+      100%{ left:120%; opacity:0; }
+    }
+
+    .card h3{margin:0;font-size:16px}
+    .card p{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+    .card .link{
+      display:inline-flex;gap:8px;align-items:center;
+      margin-top:12px;
+      font-weight:900;font-size:13px;
+      color:rgba(234,240,255,.92);
+      opacity:.95;
+    }
+    .link:hover{opacity:1}
+
+    .tipStack{margin-top:14px;display:flex;flex-direction:column;gap:12px}
+    .tip{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      border-radius: 16px;
+      padding:14px;
+    }
+    .tip h4{margin:0 0 6px;font-size:14px}
+    .tip .body{color:var(--muted);font-size:13px;line-height:1.55}
+    .action{
+      margin-top:10px;
+      border:1px solid rgba(41,211,145,.35);
+      background: rgba(41,211,145,.12);
+      border-radius: 14px;
+      padding:10px 12px;
+    }
+    .action b{display:block;color:rgba(41,211,145,.95);letter-spacing:.4px}
+    .action span{display:block;color:rgba(41,211,145,.90);font-weight:800;margin-top:6px}
+
+    .footer{
+      margin-top:22px;
+      padding:18px;
+      border-top:1px solid rgba(255,255,255,.10);
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.6;
+    }
+
+    .toast{
+      position:fixed;left:50%;transform:translateX(-50%);
+      bottom:18px;z-index:60;
+      background: rgba(15,23,51,.92);
+      border:1px solid rgba(255,255,255,.14);
+      padding:12px 14px;border-radius:999px;
+      box-shadow: var(--shadow);
+      display:none;
+      align-items:center;
+      gap:10px;
+      max-width: min(90vw, 780px);
+      animation: toastIn var(--dur3) var(--spring) both;
+    }
+    @keyframes toastIn{
+      from{opacity:0; transform:translateX(-50%) translateY(10px) scale(.98)}
+      to{opacity:1; transform:translateX(-50%) translateY(0) scale(1)}
+    }
+    .toast .dot{
+      width:10px;height:10px;border-radius:99px;background:var(--blue2);
+      box-shadow:0 0 0 6px rgba(90,160,255,.10)
+    }
+    .toast small{color:rgba(234,240,255,.9);font-weight:800}
+
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      padding:3px 8px;border-radius:10px;
+      color:rgba(234,240,255,.92);
+      font-size:12px;
+    }
+
+    /* -------------------------------
+       UV TRACKER (killer but consistent)
+    -------------------------------- */
+    .uvRow{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+    .uvBadge{
+      flex:1; min-width:240px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      border-radius:16px;
+      padding:12px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .uvDot{
+      width:10px;height:10px;border-radius:99px;
+      background: rgba(234,240,255,.35);
+      box-shadow:0 0 0 6px rgba(234,240,255,.08);
+    }
+    .uvBadge b{display:block;font-size:14px;letter-spacing:.2px}
+    .uvBadge span{color:var(--muted);font-size:12px}
+    .uvInputs{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .uvInputs input{
+      flex:1; min-width:170px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding:10px 12px;
+      border-radius:14px;
+      outline:none;
+      transition: border-color var(--dur2) var(--ease-out), box-shadow var(--dur2) var(--ease-out), transform var(--dur2) var(--spring);
+    }
+    .uvInputs input:focus{
+      border-color: rgba(90,160,255,.55);
+      box-shadow: 0 0 0 3px rgba(90,160,255,.16);
+      transform: translateY(-1px);
+    }
+    .uvAdvice{
+      margin-top:12px;
+      border:1px solid rgba(90,160,255,.22);
+      background: rgba(43,111,240,.10);
+      border-radius:16px;
+      padding:12px;
+      color: rgba(234,240,255,.92);
+      font-size:13px; line-height:1.55;
+    }
+    .uvActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .uvAuto{
+      margin-top:14px;
+      border-top:1px solid rgba(255,255,255,.10);
+      padding-top:12px;
+    }
+
+    /* subtle divider utility */
+    .hrGlow{
+      height:1px;
+      background: linear-gradient(90deg, transparent, rgba(90,160,255,.55), transparent);
+      margin: 14px 0;
+      opacity:.7;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="nav">
+    <div class="brand">
+      <div class="logo">HH</div>
+      <div>
+        <h1>Health Hack</h1>
+        <p>Lupus (SLE) • Meals • Mind • BP • Hydration • Sun/UV</p>
+      </div>
+    </div>
+    <div class="navActions">
+      <a class="btn" href="#tips">Lupus Tips</a>
+      <a class="btn" href="#features">Features</a>
+      <button class="btn btnPrimary" id="btnStart">Open App Demo</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="grid">
+      <div class="hero">
+        <div class="heroInner">
+          <div class="kicker"><span class="kdot"></span>Built for Lupus (SLE) • Daily Support</div>
+
+          <h2 class="title">Your life is bigger than lupus. <span style="color:rgba(90,160,255,.95)">We help you run it.</span></h2>
+
+          <p class="subtitle">
+            Health Hack is a private, local-first companion that helps you track meals, hydration, blood pressure, and mindset —
+            while giving lupus-focused tips with clear action steps. Includes a Sun/UV tracker to help reduce flare risk.
+          </p>
+
+          <div class="ctaRow">
+            <button class="btn btnPrimary" id="btnNutritionist">Talk to AI Nutritionist</button>
+            <button class="btn" id="btnTips">View Lupus Tips</button>
+            <button class="btn" id="btnLogMeal">Log a Meal</button>
+          </div>
+
+          <p class="mini">
+            No shame. No overwhelm. Just the next best move — every day.
+            <span class="kbd">Lupus (SLE)</span> is the focus.
+          </p>
+
+          <div class="cards" id="features">
+            <div class="card">
+              <div class="cardTop">
+                <div class="icon">🍽️</div>
+                <div>
+                  <h3>Meal Log + Ratings</h3>
+                  <p>Track meals and notes, spot inflammation triggers, and keep nutrition simple and consistent.</p>
+                  <span class="link">Open Meals →</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="cardTop">
+                <div class="icon">❤️</div>
+                <div>
+                  <h3>Blood Pressure Tracker</h3>
+                  <p>Log BP readings and trends. Great for stress, sleep, and overall health awareness.</p>
+                  <span class="link">Open BP →</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="cardTop">
+                <div class="icon">💧</div>
+                <div>
+                  <h3>Hydration Tracker</h3>
+                  <p>Quick-add water and stay consistent. If you have restrictions, follow your clinician.</p>
+                  <span class="link">Open Water →</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="cardTop">
+                <div class="icon">🧠</div>
+                <div>
+                  <h3>Mind Check-In</h3>
+                  <p>Track mood + stress. Build coping tools for chronic illness days (not a replacement for care).</p>
+                  <span class="link">Open Mind →</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ✅ UV TRACKER CARD (added, matches your layout) -->
+            <div class="card" id="uvCard" style="grid-column:1/-1">
+              <div class="cardTop">
+                <div class="icon">☀️</div>
+                <div style="flex:1">
+                  <h3>Sun / UV Tracker</h3>
+                  <p>Track UV exposure and get protection guidance (lupus-friendly habits).</p>
+
+                  <div class="uvRow">
+                    <div class="uvBadge" id="uvBadge">
+                      <span class="uvDot" id="uvDot"></span>
+                      <div>
+                        <b id="uvLabel">UV: —</b>
+                        <span id="uvDesc">No reading yet</span>
+                      </div>
+                    </div>
+
+                    <div class="uvInputs">
+                      <input id="uvManual" type="number" inputmode="decimal" min="0" max="20" step="0.1" placeholder="Enter UV (0–20)" />
+                      <button class="btn" id="btnSaveUV" type="button">Save UV</button>
+                    </div>
+                  </div>
+
+                  <div class="uvAdvice" id="uvAdvice">Save a UV reading to get guidance.</div>
+
+                  <div class="uvActions">
+                    <button class="btn" id="btnUVReminder" type="button">Start Sunscreen Timer</button>
+                    <button class="btn" id="btnClearUV" type="button">Clear Today</button>
+                  </div>
+
+                  <div class="mini" id="uvMeta" style="margin-top:10px">
+                    Local-first. Saves today’s UV reading on this device.
+                  </div>
+
+                  <div class="uvAuto">
+                    <div class="mini">Optional auto UV (no key):</div>
+                    <div class="uvInputs">
+                      <input id="uvLat" type="number" inputmode="decimal" step="0.0001" placeholder="Lat (e.g., 33.1507)" />
+                      <input id="uvLon" type="number" inputmode="decimal" step="0.0001" placeholder="Lon (e.g., -96.8236)" />
+                      <button class="btn btnPrimary" id="btnAutoUV" type="button">Auto UV</button>
+                    </div>
+                    <div class="mini">Frisco TX approx: <span class="kbd">33.1507</span> / <span class="kbd">-96.8236</span></div>
+                  </div>
+
+                  <div class="hrGlow"></div>
+                  <div class="mini">
+                    Pro move: If you’re photosensitive, treat “Moderate UV” like “High UV” for safety habits.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /UV -->
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <h2>Lupus Snapshot</h2>
+        <p class="subtitle" style="margin:0">
+          Lupus can be unpredictable. The win is consistency: pacing, tracking, and protecting your energy.
+        </p>
+
+        <div class="statRow">
+          <div class="stat">
+            <b id="statMeals">0</b>
+            <span>Meals logged today</span>
+          </div>
+          <div class="stat">
+            <b id="statActions">0</b>
+            <span>Action steps completed</span>
+          </div>
+        </div>
+
+        <div class="tipStack" id="tips">
+          <div class="tip">
+            <h4>🦋 Track Flare Signs Early</h4>
+            <div class="body">Fatigue spikes, joint pain, rashes, feverish feeling, brain fog — track what changes and when.</div>
+            <div class="action"><b>ACTION STEP:</b><span>Write 3 symptoms you noticed today (even small).</span></div>
+          </div>
+
+          <div class="tip">
+            <h4>☀️ Protect From UV Exposure</h4>
+            <div class="body">Sun/UV can trigger symptoms for many people. Use the UV tracker + plan shade and coverage.</div>
+            <div class="action"><b>ACTION STEP:</b><span>Save today’s UV reading and set your protection plan.</span></div>
+          </div>
+
+          <div class="tip">
+            <h4>🛌 Pace Your Energy</h4>
+            <div class="body">Overdoing it can cost you tomorrow. Use “stop-before-exhaustion” pacing.</div>
+            <div class="action"><b>ACTION STEP:</b><span>Schedule one 20–30 minute rest window today.</span></div>
+          </div>
+
+          <div class="tip">
+            <h4>💊 Medication Consistency</h4>
+            <div class="body">Take meds exactly as prescribed. Don’t change dose/stop without your clinician.</div>
+            <div class="action"><b>ACTION STEP:</b><span>Set a medication reminder (same time daily).</span></div>
+          </div>
+
+          <div class="tip">
+            <h4>🧘 Stress = Inflammation Fuel</h4>
+            <div class="body">Stress can amplify symptoms. Small daily calming rituals beat “waiting for motivation.”</div>
+            <div class="action"><b>ACTION STEP:</b><span>Do 6 slow breaths: in 4, hold 2, out 6.</span></div>
+          </div>
+        </div>
+
+        <button class="btn btnPrimary" style="width:100%;margin-top:14px" id="btnCompleteAction">
+          Complete 1 Action Step
+        </button>
+
+        <div class="footer">
+          <b style="color:rgba(234,240,255,.92)">Important:</b> Health Hack provides educational guidance and habit support — not medical diagnosis or treatment.
+          For lupus (SLE), always follow your clinician/rheumatologist’s plan. If symptoms are sudden, severe, or scary, seek urgent care.
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">
+    <span class="dot"></span>
+    <small id="toastText">Saved.</small>
+  </div>
+
+  <script>
+    // =========================================================
+    // HEALTH HACK — LOCAL-FIRST DEMO JS (TOP TIER SMALL)
+    // - counters
+    // - micro toasts
+    // - UV tracker (manual + optional auto w/ lat/lon)
+    // =========================================================
+
+    const $ = (id) => document.getElementById(id);
+
+    const state = {
+      mealsToday: Number(localStorage.getItem("hh_mealsToday") || "0"),
+      actions: Number(localStorage.getItem("hh_actions") || "0")
+    };
+
+    function setCounters(){
+      $("statMeals").textContent = state.mealsToday;
+      $("statActions").textContent = state.actions;
+    }
+
+    function toast(msg){
+      $("toastText").textContent = msg;
+      $("toast").style.display = "flex";
+      clearTimeout(window.__t);
+      window.__t = setTimeout(()=> $("toast").style.display="none", 2200);
+    }
+
+    function saveCounters(){
+      localStorage.setItem("hh_mealsToday", String(state.mealsToday));
+      localStorage.setItem("hh_actions", String(state.actions));
+      setCounters();
+    }
+
+    // Buttons
+    $("btnStart").addEventListener("click", () => {
+      toast("App demo opened (hook this to your real /app route).");
+    });
+
+    $("btnTips").addEventListener("click", () => {
+      document.querySelector("#tips").scrollIntoView({behavior:"smooth", block:"start"});
+      toast("Lupus tips loaded.");
+    });
+
+    $("btnLogMeal").addEventListener("click", () => {
+      state.mealsToday += 1;
+      saveCounters();
+      toast("Meal logged ✅ (demo counter).");
+    });
+
+    $("btnNutritionist").addEventListener("click", () => {
+      toast("AI Nutritionist (demo): anti-inflammatory swap → whole foods, less sugar, less processed.");
+    });
+
+    $("btnCompleteAction").addEventListener("click", () => {
+      state.actions += 1;
+      saveCounters();
+      toast("Action step completed ✅");
+    });
+
+    // ---------------------------
+    // UV Tracker (local-first)
+    // ---------------------------
+    const UV_KEY = "hh_uv_today";
+
+    function uvDayKey(){
+      return new Date().toISOString().slice(0,10);
+    }
+
+    function setUVDot(level){
+      const dot = $("uvDot");
+      if(!dot) return;
+
+      if(level == null){
+        dot.style.background = "rgba(234,240,255,.35)";
+        dot.style.boxShadow = "0 0 0 6px rgba(234,240,255,.08)";
+        return;
+      }
+
+      if(level < 3){
+        dot.style.background = "rgba(41,211,145,.95)";
+        dot.style.boxShadow = "0 0 0 6px rgba(41,211,145,.12)";
+      } else if(level < 6){
+        dot.style.background = "rgba(255,209,102,.95)";
+        dot.style.boxShadow = "0 0 0 6px rgba(255,209,102,.12)";
+      } else {
+        dot.style.background = "rgba(255,93,108,.95)";
+        dot.style.boxShadow = "0 0 0 6px rgba(255,93,108,.12)";
+      }
+    }
+
+    function uvAdvice(level){
+      if(level == null) return "Save a UV reading to get guidance.";
+      if(level < 3){
+        return "Low UV. Still consider protection if you're photosensitive. Hat + shade is an easy win.";
+      }
+      if(level < 6){
+        return "Moderate UV. Plan shade, consider long sleeves/hat, and avoid peak sun when possible.";
+      }
+      if(level < 8){
+        return "High UV. Prefer shade + protective clothing. Limit outdoor time during peak hours.";
+      }
+      if(level < 11){
+        return "Very High UV. Minimize sun exposure. Prioritize shade/cover and indoor alternatives.";
+      }
+      return "Extreme UV. Avoid direct sun as much as possible and protect aggressively (shade + coverage).";
+    }
+
+    function loadUV(){
+      try{
+        const raw = localStorage.getItem(UV_KEY);
+        if(!raw) return null;
+        const obj = JSON.parse(raw);
+        if(obj.day !== uvDayKey()) return null;
+        return obj;
+      }catch{ return null; }
+    }
+
+    function saveUV(level, source="manual"){
+      const obj = { day: uvDayKey(), level, source, ts: Date.now() };
+      localStorage.setItem(UV_KEY, JSON.stringify(obj));
+      renderUV(obj);
+    }
+
+    function clearUV(){
+      localStorage.removeItem(UV_KEY);
+      renderUV(null);
+    }
+
+    function renderUV(obj){
+      if(!("uvLabel" in window) && !$("uvLabel")){} // no-op guard
+
+      const label = $("uvLabel");
+      const desc = $("uvDesc");
+      const adviceEl = $("uvAdvice");
+      const meta = $("uvMeta");
+      if(!label || !desc || !adviceEl || !meta) return;
+
+      if(!obj){
+        label.textContent = "UV: —";
+        desc.textContent = "No reading yet";
+        adviceEl.textContent = uvAdvice(null);
+        meta.textContent = "Local-first. Saves today’s UV reading on this device.";
+        setUVDot(null);
+        return;
+      }
+
+      const lvl = Number(obj.level);
+      label.textContent = `UV: ${lvl.toFixed(1)}`;
+      desc.textContent = obj.source === "auto" ? "Auto reading" : "Manual reading";
+      adviceEl.textContent = uvAdvice(lvl);
+
+      const t = new Date(obj.ts);
+      meta.textContent = `Saved ${t.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})} • ${obj.source}`;
+      setUVDot(lvl);
+    }
+
+    // Sunscreen timer (simple local reminder)
+    let uvTimer = null;
+    function startUVReminder(){
+      if(uvTimer) clearInterval(uvTimer);
+
+      const minutes = 90; // education-only reminder cadence
+      const end = Date.now() + minutes*60*1000;
+
+      toast(`Sunscreen timer started (${minutes} min).`);
+
+      uvTimer = setInterval(() => {
+        const left = end - Date.now();
+        if(left <= 0){
+          clearInterval(uvTimer);
+          uvTimer = null;
+          toast("Reminder: time to reapply protection ✅");
+        }
+      }, 1000);
+    }
+
+    // Optional auto UV via Open-Meteo (no key)
+    async function autoUV(lat, lon){
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=uv_index`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error("Auto UV fetch failed");
+      const data = await res.json();
+      const uv = data?.current?.uv_index;
+      if(uv == null) throw new Error("No UV in response");
+      return Number(uv);
+    }
+
+    // Wire UV events
+    window.addEventListener("DOMContentLoaded", () => {
+      setCounters();
+      renderUV(loadUV());
+
+      $("btnSaveUV")?.addEventListener("click", () => {
+        const v = Number($("uvManual")?.value);
+        if(!Number.isFinite(v) || v < 0) return toast("Enter a valid UV number");
+        saveUV(v, "manual");
+        toast("UV saved ✅");
+      });
+
+      $("btnClearUV")?.addEventListener("click", () => {
+        clearUV();
+        toast("UV cleared");
+      });
+
+      $("btnUVReminder")?.addEventListener("click", () => startUVReminder());
+
+      $("btnAutoUV")?.addEventListener("click", async () => {
+        const lat = Number($("uvLat")?.value);
+        const lon = Number($("uvLon")?.value);
+        if(!Number.isFinite(lat) || !Number.isFinite(lon)) return toast("Enter valid lat/lon");
+
+        try{
+          toast("Fetching UV…");
+          const uv = await autoUV(lat, lon);
+          saveUV(uv, "auto");
+          toast("Auto UV saved ✅");
+        }catch(e){
+          toast("Auto UV failed — use manual UV instead.");
+        }
+      });
+    });
+  </script>
+</body>
+  </html>
