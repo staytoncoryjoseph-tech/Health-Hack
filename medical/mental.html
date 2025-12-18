@@ -10,13 +10,15 @@
     :root{
       --bg:#060a14;
       --card:#0b1430;
+      --card2:#070d1b;
       --border:rgba(140,160,220,.15);
       --text:#e9ecf1;
       --muted:#9aa4c7;
       --accent:#4da3ff;
       --danger:#ff6b6b;
+      --ok:#43d19e;
+      --warn:#ffcc66;
     }
-
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -24,103 +26,93 @@
       background:var(--bg);
       color:var(--text);
     }
-
-    .container{
-      max-width:1100px;
-      margin:auto;
-      padding:24px;
-    }
-
+    .container{max-width:1100px;margin:auto;padding:24px}
     h1,h2,h3{margin:0 0 10px}
-    p{color:var(--muted)}
-
-    .grid{
-      display:grid;
-      gap:20px;
-      grid-template-columns:1fr;
-    }
-
-    @media(min-width:900px){
-      .grid{grid-template-columns:1.2fr .8fr}
-    }
-
+    p{color:var(--muted); margin: 0 0 14px}
+    .grid{display:grid;gap:20px;grid-template-columns:1fr}
+    @media(min-width:900px){.grid{grid-template-columns:1.2fr .8fr}}
     .card{
-      background:linear-gradient(180deg,#0b1430,#070d1b);
+      background:linear-gradient(180deg,var(--card),var(--card2));
       border:1px solid var(--border);
       border-radius:18px;
       padding:20px;
     }
-
+    .top-row{
+      display:flex; gap:12px; flex-wrap:wrap;
+      align-items:center; justify-content:space-between;
+      margin: 14px 0 18px;
+    }
+    .pill{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    }
+    .badge{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      background:rgba(77,163,255,.08);
+    }
     .disclaimer{
       border-left:4px solid var(--danger);
       padding:14px 16px;
       background:rgba(255,107,107,.08);
-      margin-bottom:20px;
+      border-radius:14px;
+      margin-bottom:16px;
       font-size:14px;
     }
-
-    .chat-box{
-      display:flex;
-      flex-direction:column;
-      height:420px;
-    }
-
-    .messages{
-      flex:1;
-      overflow-y:auto;
-      padding-right:6px;
-    }
-
-    .msg{
-      margin-bottom:14px;
-      line-height:1.45;
-    }
-
-    .user{color:#fff}
-    .ai{color:#b7d6ff}
-
-    .input-row{
-      display:flex;
-      gap:10px;
-      margin-top:12px;
-    }
-
-    input,button{
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    select,input,button,textarea{
       background:#0b1430;
       color:#fff;
       border:1px solid var(--border);
       border-radius:14px;
       padding:12px 14px;
       font-size:15px;
+      outline:none;
     }
-
-    input{flex:1}
-
+    textarea{width:100%; min-height:86px; resize:vertical; line-height:1.4}
     button{
       cursor:pointer;
       background:linear-gradient(180deg,#4da3ff,#357edd);
       border:none;
+      font-weight:600;
     }
-
     button.secondary{
       background:#0b1430;
       border:1px solid var(--border);
-    }
-
-    .stat{
-      display:flex;
-      justify-content:space-between;
-      margin-bottom:12px;
-      font-size:15px;
-    }
-
-    .danger-text{
-      color:var(--danger);
       font-weight:600;
+    }
+    .chat-box{display:flex;flex-direction:column;height:440px}
+    .messages{flex:1;overflow-y:auto;padding-right:6px}
+    .msg{margin-bottom:14px;line-height:1.45}
+    .user{color:#fff}
+    .ai{color:#b7d6ff}
+    .system{color:var(--muted); font-size:13px}
+    .input-row{display:flex;gap:10px;margin-top:12px}
+    .input-row input{flex:1}
+    .stat{
+      display:flex; justify-content:space-between;
+      margin-bottom:12px; font-size:15px;
+    }
+    .small{font-size:13px;color:var(--muted)}
+    .hr{border-top:1px solid var(--border); margin:18px 0}
+    .tipcard{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:14px;
+      background:rgba(255,255,255,.03);
       margin-top:10px;
     }
-
-    .small{font-size:13px;color:var(--muted)}
+    .tipcard h3{font-size:16px;margin-bottom:6px}
+    .tips{margin:0; padding-left:18px; color:var(--muted)}
+    .flag{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:12px; padding:6px 10px; border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,204,102,.08);
+      color:var(--warn);
+    }
   </style>
 </head>
 
@@ -128,14 +120,32 @@
 <div class="container">
 
   <h1>🩺 Medical AI Assistant</h1>
-  <p>General medical information, daily health tracking, and guidance — **not a doctor**.</p>
+  <p>General medical info + health tracking — **not a doctor**.</p>
+
+  <div class="top-row">
+    <div class="pill">
+      <span class="badge">Local-first • No Firebase</span>
+      <span class="badge">Condition-Specific Mode</span>
+      <span class="badge">Emergency keyword detection</span>
+    </div>
+
+    <div class="row">
+      <label class="small" for="conditionSelect">Condition Mode</label>
+      <select id="conditionSelect" onchange="setConditionMode(this.value)">
+        <option value="general">General</option>
+        <option value="lupus">Lupus (SLE)</option>
+        <option value="ckd3">Kidney Disease (CKD Stage 3)</option>
+        <option value="htn">High Blood Pressure (Hypertension)</option>
+        <option value="diabetes">Diabetes (General)</option>
+        <option value="stress">Anxiety / Stress</option>
+      </select>
+    </div>
+  </div>
 
   <div class="disclaimer">
     <strong>Important Disclaimer:</strong><br>
-    This Medical AI is <strong>not a licensed medical professional</strong>.  
-    It does not diagnose, treat, or replace a doctor.  
-    Information provided is for <strong>educational and informational purposes only</strong>.  
-    If you are experiencing a medical emergency, call <strong>911</strong> immediately.
+    This Medical AI is <strong>not a licensed medical professional</strong>. It does not diagnose, treat, or replace a doctor.
+    Information is for <strong>educational purposes only</strong>. If you think you’re having an emergency, call <strong>911</strong>.
   </div>
 
   <div class="grid">
@@ -143,7 +153,7 @@
     <!-- ================= MEDICAL AI CHAT ================= -->
     <div class="card">
       <h2>Medical AI Chat</h2>
-      <p class="small">Ask general medical questions (symptoms, meds, lifestyle, conditions).</p>
+      <p class="small">Ask questions. The answers will be tailored to your selected Condition Mode.</p>
 
       <div class="chat-box">
         <div class="messages" id="messages"></div>
@@ -152,10 +162,15 @@
           <input id="userInput" placeholder="Ask a medical question…" />
           <button onclick="sendMessage()">Ask</button>
         </div>
+
+        <div class="row" style="margin-top:10px; justify-content:space-between;">
+          <button class="secondary" onclick="clearChat()">Clear Chat</button>
+          <span id="modeFlag" class="flag" title="Current AI scope">Mode: General</span>
+        </div>
       </div>
     </div>
 
-    <!-- ================= HEALTH METRICS ================= -->
+    <!-- ================= HEALTH METRICS + CONDITION TIPS ================= -->
     <div class="card">
       <h2>Health Metrics</h2>
 
@@ -166,12 +181,12 @@
       </div>
 
       <div class="input-row">
-        <input id="systolic" placeholder="Systolic (e.g. 120)" />
-        <input id="diastolic" placeholder="Diastolic (e.g. 80)" />
+        <input id="systolic" inputmode="numeric" placeholder="Systolic (e.g. 120)" />
+        <input id="diastolic" inputmode="numeric" placeholder="Diastolic (e.g. 80)" />
         <button class="secondary" onclick="saveBP()">Save</button>
       </div>
 
-      <hr style="border-color:var(--border);margin:20px 0">
+      <div class="hr"></div>
 
       <h3>Steps</h3>
       <div class="stat">
@@ -180,86 +195,379 @@
       </div>
 
       <div class="input-row">
-        <input id="stepsInput" placeholder="Enter steps" />
+        <input id="stepsInput" inputmode="numeric" placeholder="Enter steps" />
         <button class="secondary" onclick="saveSteps()">Save</button>
       </div>
 
       <p class="small">* Sensor auto-tracking can be added later for mobile builds.</p>
+
+      <div class="hr"></div>
+
+      <h2>Condition Tips</h2>
+      <p class="small">These update when you change Condition Mode.</p>
+
+      <div class="tipcard">
+        <h3 id="tipsTitle">General Guidance</h3>
+        <ul class="tips" id="tipsList"></ul>
+        <p class="small" id="tipsNote" style="margin-top:10px;"></p>
+      </div>
+
     </div>
 
   </div>
 </div>
 
 <script>
-/* ================= STORAGE ================= */
+/* ================= STORAGE KEYS ================= */
 const bpKey = "health.bp.v1";
 const stepsKey = "health.steps.v1";
+const conditionKey = "health.conditionMode.v1";
+const chatKey = "health.medicalChat.v1";
 
-/* ================= LOAD ================= */
+/* ================= CONDITION PLAYBOOK ================= */
+const CONDITIONS = {
+  general: {
+    label: "General",
+    tipsTitle: "General Guidance",
+    tips: [
+      "If symptoms are severe, sudden, or worsening fast, seek urgent care.",
+      "Track basics daily: sleep, hydration, stress, steps, and blood pressure.",
+      "For new meds/supplements, check interactions with a pharmacist or clinician.",
+      "Bring a symptom timeline to appointments (when it started, triggers, what helps)."
+    ],
+    note: "General info only. For diagnosis and treatment plans, consult a licensed clinician.",
+    scopeRules: [
+      "Do not diagnose. Provide possible causes and next steps.",
+      "Encourage medical evaluation for persistent or concerning symptoms.",
+      "Use plain language and safety-first guidance."
+    ]
+  },
+
+  lupus: {
+    label: "Lupus (SLE)",
+    tipsTitle: "Lupus (SLE) — Daily Focus",
+    tips: [
+      "Pace activity: avoid overexertion; plan rest breaks to prevent flares.",
+      "Sun protection matters: SPF + protective clothing; UV can trigger symptoms.",
+      "Track flare signals: fatigue, joint pain, rash, fever, swelling, mouth sores.",
+      "Medication adherence is key (e.g., hydroxychloroquine if prescribed). Don’t stop meds abruptly.",
+      "Discuss vaccines/infections early—immune modulation can change risk."
+    ],
+    note: "Lupus varies widely. If you have chest pain, shortness of breath, confusion, or sudden swelling—seek urgent care.",
+    scopeRules: [
+      "Emphasize flare tracking, sun protection, fatigue/joint management, and safe questions to ask a rheumatologist.",
+      "Avoid giving medication dosing or changing prescriptions."
+    ]
+  },
+
+  ckd3: {
+    label: "CKD Stage 3",
+    tipsTitle: "CKD Stage 3 — Daily Focus",
+    tips: [
+      "Blood pressure control is a big deal—log BP consistently and share with your clinician.",
+      "Hydration guidance can be personal—follow your care plan (do not over-restrict or overdo fluids).",
+      "Be cautious with NSAIDs (like ibuprofen/naproxen) unless your clinician says it’s okay.",
+      "Watch salt (sodium) and ultra-processed foods; ask about protein targets.",
+      "Get labs on schedule (eGFR, creatinine, potassium, urine protein)."
+    ],
+    note: "CKD advice must be individualized. Ask your clinician about potassium/phosphorus limits and medication safety.",
+    scopeRules: [
+      "Emphasize safe lifestyle themes (BP, sodium, NSAID caution, lab follow-up).",
+      "Avoid strict diet prescriptions; suggest discussing with nephrology/dietitian."
+    ]
+  },
+
+  htn: {
+    label: "Hypertension",
+    tipsTitle: "Hypertension — Daily Focus",
+    tips: [
+      "Measure BP correctly: seated, relaxed, arm supported, same time daily for consistency.",
+      "Lower sodium, increase potassium-rich foods only if your clinician approves (especially if CKD).",
+      "Movement helps: regular walks + gradual fitness progression.",
+      "Sleep and stress matter—poor sleep can raise BP.",
+      "Know red flags: very high BP with chest pain, severe headache, weakness, or vision changes → emergency care."
+    ],
+    note: "If BP is extremely high and you feel unwell, treat it as urgent. Don’t self-adjust prescriptions.",
+    scopeRules: [
+      "Coach measurement technique, lifestyle basics, and emergency red flags.",
+      "No medication changes or dosing advice."
+    ]
+  },
+
+  diabetes: {
+    label: "Diabetes (General)",
+    tipsTitle: "Diabetes — Daily Focus",
+    tips: [
+      "Build meals around fiber + protein + healthy fats to reduce glucose spikes.",
+      "Track patterns: meals, activity, sleep, stress — they all affect glucose.",
+      "Foot care matters: check daily for cuts, swelling, or redness.",
+      "Stay consistent with meds as prescribed; ask about sick-day rules.",
+      "Know low blood sugar signs (shakiness, sweating, confusion) and what your care plan says to do."
+    ],
+    note: "Diabetes management is individualized. For dosing/insulin questions, defer to your clinician’s plan.",
+    scopeRules: [
+      "Emphasize education and pattern recognition.",
+      "Avoid insulin dosing or medication titration."
+    ]
+  },
+
+  stress: {
+    label: "Anxiety / Stress",
+    tipsTitle: "Anxiety / Stress — Daily Focus",
+    tips: [
+      "Use a quick reset: slow breathing (inhale 4, exhale 6) for 2–5 minutes.",
+      "Reduce stimulants (excess caffeine/nicotine) if anxiety is high.",
+      "Track triggers and body signals (tight chest, racing thoughts, poor sleep).",
+      "Move your body daily—even a short walk helps regulate stress hormones.",
+      "If you feel unsafe or at risk of harming yourself, seek immediate help or call 988 (US)."
+    ],
+    note: "This isn’t therapy. If anxiety is severe or persistent, consider professional support.",
+    scopeRules: [
+      "Provide grounding techniques and support-seeking guidance.",
+      "Escalate safety concerns immediately."
+    ]
+  }
+};
+
+/* ================= EMERGENCY DETECTION ================= */
+const emergencyKeywords = [
+  "chest pain", "shortness of breath", "stroke", "seizure", "fainting",
+  "severe headache", "vision loss", "can't breathe", "suicidal", "kill myself",
+  "face drooping", "one sided weakness", "confusion", "unresponsive"
+];
+
+/* ================= STATE ================= */
+let currentMode = "general";
+
+/* ================= INIT ================= */
 (function init(){
-  const bp = JSON.parse(localStorage.getItem(bpKey));
-  if(bp){
-    document.getElementById("bpDisplay").textContent =
-      bp.sys + "/" + bp.dia + " mmHg";
+  // load BP
+  const bp = safeParse(localStorage.getItem(bpKey));
+  if(bp && bp.sys && bp.dia){
+    document.getElementById("bpDisplay").textContent = `${bp.sys}/${bp.dia} mmHg`;
   }
 
+  // load steps
   const steps = localStorage.getItem(stepsKey);
-  if(steps){
-    document.getElementById("stepsDisplay").textContent = steps;
-  }
+  if(steps) document.getElementById("stepsDisplay").textContent = steps;
 
-  addAI("Hi. I’m your Medical AI assistant. I can provide general medical information, explain conditions, medications, and healthy habits. I am not a doctor, but I’m here to help you understand.");
+  // load mode
+  const savedMode = localStorage.getItem(conditionKey);
+  if(savedMode && CONDITIONS[savedMode]) currentMode = savedMode;
+  document.getElementById("conditionSelect").value = currentMode;
+  applyModeUI();
+
+  // load chat
+  const savedChat = safeParse(localStorage.getItem(chatKey)) || [];
+  if(savedChat.length){
+    savedChat.forEach(m => m.role === "user" ? addUser(m.text, false) : addAI(m.text, false, m.kind));
+    scrollChat();
+  } else {
+    addAI(`Hi. I’m your Medical AI assistant. Current mode: ${CONDITIONS[currentMode].label}. Ask me anything and I’ll keep it educational and safety-first.`, true, "system");
+  }
 })();
 
-/* ================= CHAT ================= */
-function addUser(text){
+/* ================= HELPERS ================= */
+function safeParse(s){ try { return JSON.parse(s); } catch { return null; } }
+
+function persistChat(role, text, kind="normal"){
+  const arr = safeParse(localStorage.getItem(chatKey)) || [];
+  arr.push({ role, text, kind, t: Date.now(), mode: currentMode });
+  localStorage.setItem(chatKey, JSON.stringify(arr.slice(-200))); // keep last 200
+}
+
+function scrollChat(){
+  const box = document.getElementById("messages");
+  box.scrollTop = box.scrollHeight;
+}
+
+function addUser(text, persist=true){
   const div = document.createElement("div");
   div.className="msg user";
   div.textContent="You: " + text;
-  messages.appendChild(div);
+  document.getElementById("messages").appendChild(div);
+  if(persist) persistChat("user", text);
+  scrollChat();
 }
 
-function addAI(text){
+function addAI(text, persist=true, kind="normal"){
   const div = document.createElement("div");
-  div.className="msg ai";
-  div.textContent="Medical AI: " + text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
+  div.className = "msg " + (kind === "system" ? "system" : "ai");
+  div.textContent = (kind === "system" ? "Note: " : "Medical AI: ") + text;
+  document.getElementById("messages").appendChild(div);
+  if(persist) persistChat("ai", text, kind);
+  scrollChat();
 }
 
-function sendMessage(){
-  const input = userInput.value.trim();
-  if(!input) return;
-  addUser(input);
-  userInput.value="";
+/* ================= MODE ================= */
+function setConditionMode(mode){
+  if(!CONDITIONS[mode]) mode = "general";
+  currentMode = mode;
+  localStorage.setItem(conditionKey, currentMode);
+  applyModeUI();
+  addAI(`Condition Mode set to: ${CONDITIONS[currentMode].label}. Ask your question and I’ll tailor the guidance.`, true, "system");
+}
 
-  const emergencyWords = ["chest pain","shortness of breath","stroke","seizure","fainting"];
-  if(emergencyWords.some(w => input.toLowerCase().includes(w))){
-    addAI("⚠️ Your message may indicate a medical emergency. Please seek immediate medical attention or call 911.");
+function applyModeUI(){
+  const info = CONDITIONS[currentMode] || CONDITIONS.general;
+
+  // mode flag
+  document.getElementById("modeFlag").textContent = `Mode: ${info.label}`;
+
+  // tips
+  document.getElementById("tipsTitle").textContent = info.tipsTitle;
+  const ul = document.getElementById("tipsList");
+  ul.innerHTML = "";
+  info.tips.forEach(t => {
+    const li = document.createElement("li");
+    li.textContent = t;
+    ul.appendChild(li);
+  });
+  document.getElementById("tipsNote").textContent = info.note;
+}
+
+/* ================= CHAT LOGIC ================= */
+function sendMessage(){
+  const inputEl = document.getElementById("userInput");
+  const input = inputEl.value.trim();
+  if(!input) return;
+
+  addUser(input);
+  inputEl.value = "";
+
+  const lc = input.toLowerCase();
+
+  // emergency detection
+  if(emergencyKeywords.some(k => lc.includes(k))){
+    addAI("⚠️ Your message includes signs that could be an emergency. Please seek immediate medical attention or call 911 (or local emergency number).", true, "system");
     return;
   }
 
-  // Placeholder logic (later replaced with real AI)
-  addAI("I can share general medical information, common causes, and lifestyle considerations. For diagnosis or treatment, consult a licensed healthcare provider.");
+  // respond with rule-based, mode-specific educational guidance
+  const mode = CONDITIONS[currentMode] || CONDITIONS.general;
+
+  const response = buildResponse(input, mode);
+  addAI(response);
+}
+
+function buildResponse(question, mode){
+  const q = question.toLowerCase();
+
+  // universal structure: (1) disclaimer-lite (2) likely themes (3) next steps (4) mode tips (5) red flags
+  const redFlags = [
+    "chest pain, severe shortness of breath, fainting",
+    "one-sided weakness, face drooping, confusion",
+    "severe headache with vision changes",
+    "high fever + stiff neck",
+    "uncontrolled bleeding"
+  ];
+
+  // simple topic detection
+  const topic =
+    q.includes("blood pressure") || q.includes("bp") ? "bp" :
+    q.includes("kidney") || q.includes("creatinine") || q.includes("egfr") ? "kidney" :
+    q.includes("joint") || q.includes("rash") || q.includes("flare") ? "lupus" :
+    q.includes("sugar") || q.includes("glucose") || q.includes("a1c") ? "diabetes" :
+    q.includes("anxiety") || q.includes("panic") || q.includes("stress") ? "stress" :
+    "general";
+
+  let modeGuidance = "";
+  if(mode.label.includes("Lupus")){
+    modeGuidance = "In Lupus mode: I’ll prioritize flare tracking, fatigue/joint support, sun protection, and safe questions to bring to your rheumatologist.";
+  } else if(mode.label.includes("CKD")){
+    modeGuidance = "In CKD Stage 3 mode: I’ll prioritize blood pressure control, sodium awareness, medication safety (NSAID caution), and when to follow up with labs/clinician.";
+  } else if(mode.label.includes("Hypertension")){
+    modeGuidance = "In Hypertension mode: I’ll prioritize correct BP measurement, lifestyle levers (salt, sleep, movement), and emergency red flags.";
+  } else if(mode.label.includes("Diabetes")){
+    modeGuidance = "In Diabetes mode: I’ll prioritize meals that reduce spikes, pattern tracking, and safety signals for low/high blood sugar.";
+  } else if(mode.label.includes("Anxiety")){
+    modeGuidance = "In Anxiety/Stress mode: I’ll prioritize grounding techniques, trigger tracking, and support-seeking guidance.";
+  } else {
+    modeGuidance = "In General mode: I’ll give educational explanations, common possibilities, and safe next steps—without diagnosing.";
+  }
+
+  // topic-based pointers (kept safe)
+  let topicPointers = "";
+  switch(topic){
+    case "bp":
+      topicPointers =
+        "For blood pressure questions: check technique (seated, calm, arm supported), log readings over several days, and share trends with your clinician. If your BP is extremely high AND you feel unwell (chest pain, severe headache, weakness, vision changes), treat it as urgent.";
+      break;
+    case "kidney":
+      topicPointers =
+        "For kidney concerns: avoid self-adjusting fluids or diet too aggressively; ask your clinician about sodium, protein targets, potassium/phosphorus, and medication safety (especially NSAIDs). Track BP and swelling, and keep lab follow-ups on schedule.";
+      break;
+    case "lupus":
+      topicPointers =
+        "For lupus-style symptoms: track patterns (fatigue, joint pain, rash, fever), protect from UV, pace activity, and note triggers. If you have chest pain, shortness of breath, confusion, or sudden swelling, seek urgent evaluation.";
+      break;
+    case "diabetes":
+      topicPointers =
+        "For glucose concerns: look for patterns around meals, sleep, stress, and activity. Build meals with fiber + protein to blunt spikes. If you have symptoms of very low sugar (confusion, sweating, shaking), follow your care plan and get help if severe.";
+      break;
+    case "stress":
+      topicPointers =
+        "For anxiety/stress: try a quick reset (inhale 4, exhale 6 for a few minutes), reduce stimulants, and consider structured support if it’s persistent. If you feel unsafe or at risk of self-harm, seek immediate help (US: 988).";
+      break;
+    default:
+      topicPointers =
+        "Tell me your age range, key symptoms, how long it’s been going on, any meds/supplements, and what makes it better/worse. I can help you think through safe next steps and questions for your clinician.";
+  }
+
+  // mode tips (short)
+  const tipSample = (mode.tips || []).slice(0, 3).map(t => `• ${t}`).join("\n");
+
+  return [
+    "I can share general medical information, not a diagnosis.",
+    "",
+    modeGuidance,
+    "",
+    topicPointers,
+    "",
+    "Mode quick tips:",
+    tipSample || "• Stay safety-first and consult a clinician for diagnosis/treatment.",
+    "",
+    "Red flags (seek urgent help): " + redFlags.join("; ") + "."
+  ].join("\n");
+}
+
+/* ================= CHAT UTIL ================= */
+function clearChat(){
+  if(!confirm("Clear the chat history on this device?")) return;
+  localStorage.removeItem(chatKey);
+  document.getElementById("messages").innerHTML = "";
+  addAI(`Chat cleared. Current mode: ${CONDITIONS[currentMode].label}. Ask a question whenever you're ready.`, true, "system");
 }
 
 /* ================= METRICS ================= */
 function saveBP(){
-  const sys = systolic.value;
-  const dia = diastolic.value;
-  if(!sys || !dia) return alert("Enter both values");
-  localStorage.setItem(bpKey, JSON.stringify({sys,dia,date:Date.now()}));
-  bpDisplay.textContent = sys + "/" + dia + " mmHg";
-  systolic.value = diastolic.value = "";
+  const sys = document.getElementById("systolic").value.trim();
+  const dia = document.getElementById("diastolic").value.trim();
+  if(!sys || !dia) return alert("Enter both systolic and diastolic values.");
+  localStorage.setItem(bpKey, JSON.stringify({sys, dia, date: Date.now()}));
+  document.getElementById("bpDisplay").textContent = `${sys}/${dia} mmHg`;
+  document.getElementById("systolic").value = "";
+  document.getElementById("diastolic").value = "";
+  addAI("Saved your blood pressure reading locally on this device.", true, "system");
 }
 
 function saveSteps(){
-  const steps = stepsInput.value;
+  const steps = document.getElementById("stepsInput").value.trim();
   if(!steps) return;
   localStorage.setItem(stepsKey, steps);
-  stepsDisplay.textContent = steps;
-  stepsInput.value="";
+  document.getElementById("stepsDisplay").textContent = steps;
+  document.getElementById("stepsInput").value = "";
+  addAI("Saved today’s steps locally on this device.", true, "system");
 }
+
+/* ================= ENTER TO SEND ================= */
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Enter" && document.activeElement && document.activeElement.id === "userInput"){
+    e.preventDefault();
+    sendMessage();
+  }
+});
 </script>
+
 </body>
 </html>
