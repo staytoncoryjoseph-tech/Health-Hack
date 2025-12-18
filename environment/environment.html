@@ -155,6 +155,51 @@
     @media(min-width:980px){.split{grid-template-columns:1fr 1fr;}}
 
     .foot{margin-top:10px; color:var(--muted); font-size:12px; line-height:1.4;}
+
+    /* ===== Saved cities chips ===== */
+    .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .chip{
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(10,18,45,.45);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:900;
+      box-shadow:0 12px 26px rgba(0,0,0,.25);
+      transition: transform .15s ease, filter .15s ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .chip:hover{transform:translateY(-2px);filter:brightness(1.06)}
+    .chip:active{transform:translateY(0)}
+
+    /* ===== Risk banner ===== */
+    .banner{
+      margin-top:12px;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:18px;
+      padding:12px;
+      background: rgba(0,0,0,.14);
+      box-shadow: 0 18px 40px rgba(0,0,0,.25);
+    }
+    .bannerRow{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    }
+    .bannerTitle{font-weight:1000; letter-spacing:.2px;}
+    .bannerText{margin-top:8px;color:var(--muted);white-space:pre-wrap;line-height:1.4;}
+    .banner.ok{
+      border-color: rgba(62,240,176,.35);
+      background: linear-gradient(180deg, rgba(62,240,176,.12), rgba(0,0,0,.12));
+    }
+    .banner.warn{
+      border-color: rgba(255,200,87,.35);
+      background: linear-gradient(180deg, rgba(255,200,87,.12), rgba(0,0,0,.12));
+    }
+    .banner.danger{
+      border-color: rgba(255,93,108,.40);
+      background: linear-gradient(180deg, rgba(255,93,108,.14), rgba(0,0,0,.12));
+    }
   </style>
 </head>
 
@@ -180,13 +225,16 @@
       <!-- Environmental AI -->
       <div class="card">
         <h2>Environmental AI</h2>
-        <p class="small">Gets your location (or you can search a city) to show: weather, UV, allergies/pollen, air quality.</p>
+        <p class="small">Weather, UV, allergies/pollen, air quality & pollutants — plus a risk banner for today.</p>
 
         <div class="row">
           <button id="btnUseLocation" class="secondary" type="button">📍 Use my location</button>
           <input id="cityInput" placeholder="Or type a city (e.g., Frisco, TX)" />
           <button id="btnSearchCity" type="button">Search</button>
         </div>
+
+        <!-- Saved cities -->
+        <div class="chips" id="savedCities"></div>
 
         <div class="row" style="margin-top:10px;">
           <span class="pill" id="locPill">Location: not set</span>
@@ -200,10 +248,19 @@
           <div class="kpi"><div class="label">Air Quality</div><div class="val" id="kAQI">—</div></div>
         </div>
 
+        <!-- Risk Banner -->
+        <div id="riskBanner" class="banner">
+          <div class="bannerRow">
+            <div class="bannerTitle" id="riskTitle">Risk: —</div>
+            <div class="pill" id="riskScore">UV — • AQI — • Pollen —</div>
+          </div>
+          <div class="bannerText" id="riskText">Pick a location to calculate today’s risk.</div>
+        </div>
+
         <div class="box" id="envBox" style="margin-top:12px;">Pick a location to load your environment dashboard…</div>
 
         <p class="foot">
-          Notes: Pollen/allergy data availability can vary by region and season. Always use official alerts for emergencies.
+          Notes: Pollen/allergy data availability varies by region/season. Always use official alerts for emergencies.
         </p>
       </div>
 
@@ -244,7 +301,8 @@
         </div>
 
         <p class="foot">
-          Larry stays prevention-minded: routines, discipline, reflection, and small daily wins. If you’re in crisis, use local emergency resources.
+          Larry stays prevention-minded: routines, discipline, reflection, and small daily wins.
+          If you’re in crisis, use local emergency resources.
         </p>
       </div>
 
