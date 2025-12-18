@@ -1,0 +1,275 @@
+{
+  "app": { "name": "Health Hack", "defaultStage": 3 },
+
+  "shared": {
+    "globalDisclaimer": "Education only. Not medical or mental health diagnosis/treatment. If symptoms are severe, worsening, or you feel unsafe, seek professional help or emergency services."
+  },
+
+  "context": {
+    "ckdStage": 3,
+    "targets": {
+      "bp": { "sysMax": 130, "diaMax": 80 },
+      "hydration": { "minOz": 48, "maxOz": 64 },
+      "sodiumMgMax": 2000
+    }
+  },
+
+  "ais": [
+    {
+      "id": "nutritionist",
+      "name": "AI Nutritionist",
+      "emoji": "🍽️",
+      "tone": "direct-helpful",
+      "disclaimer": "Nutrition guidance only. For CKD Stage 3, confirm potassium/phosphorus/protein targets with your care team.",
+      "quickPrompts": [
+        "Give me Stage 3 CKD meal swaps for lower sodium.",
+        "Analyze my meal and tell me what to improve.",
+        "Build a simple dinner plan for tomorrow."
+      ],
+      "rules": {
+        "ifContains": [
+          { "match": ["fast food", "fried", "chips", "processed"], "replyKey": "nutrition_high_sodium" },
+          { "match": ["salad", "grilled", "baked", "vegetables"], "replyKey": "nutrition_good_choice" }
+        ],
+        "defaults": ["nutrition_default"]
+      }
+    },
+    {
+      "id": "psychologist",
+      "name": "AI Psychologist",
+      "emoji": "🧠",
+      "tone": "calm-supportive",
+      "disclaimer": "Support + coping tools. Not a replacement for a licensed professional. If you feel like harming yourself, call local emergency services or 988 (US).",
+      "quickPrompts": [
+        "I feel overwhelmed. Give me a 2-minute reset.",
+        "Help me reframe anxious thoughts about my health.",
+        "I need a plan for stress this week."
+      ],
+      "rules": {
+        "ifContains": [
+          { "match": ["panic", "anxiety", "overwhelmed"], "replyKey": "mental_anxiety_reset" },
+          { "match": ["sad", "depressed", "hopeless"], "replyKey": "mental_support" }
+        ],
+        "defaults": ["mental_default"]
+      }
+    },
+    {
+      "id": "kidneycoach",
+      "name": "Kidney Coach (Stage 3)",
+      "emoji": "🩺",
+      "tone": "coach-tough-love",
+      "disclaimer": "Stage 3 CKD education + habits. Always follow your nephrologist’s plan.",
+      "quickPrompts": [
+        "What should I focus on daily for Stage 3 CKD?",
+        "Give me a tips-and-tricks checklist for this week.",
+        "What are my top 3 priorities today?"
+      ],
+      "rules": {
+        "ifContains": [
+          { "match": ["stage 3", "ckd", "kidney"], "replyKey": "ckd_stage3_priorities" }
+        ],
+        "defaults": ["ckd_stage3_priorities"]
+      }
+    },
+    {
+      "id": "bpcoach",
+      "name": "Blood Pressure Coach",
+      "emoji": "❤️",
+      "tone": "clinical-simple",
+      "disclaimer": "BP education only. Seek urgent care for very high readings or symptoms (chest pain, shortness of breath, neuro symptoms).",
+      "quickPrompts": [
+        "My BP is 142/88 — what does that mean?",
+        "How do I take BP correctly at home?",
+        "Give me a 7-day BP improvement plan."
+      ],
+      "rules": {
+        "ifContains": [
+          { "match": ["142", "150", "160", "high bp", "hypertension"], "replyKey": "bp_high" },
+          { "match": ["how to take", "measure bp"], "replyKey": "bp_howto" }
+        ],
+        "defaults": ["bp_default"]
+      }
+    },
+    {
+      "id": "hydrationcoach",
+      "name": "Hydration Coach",
+      "emoji": "💧",
+      "tone": "practical",
+      "disclaimer": "Hydration targets vary with CKD, heart issues, and meds. Confirm your target with your clinician.",
+      "quickPrompts": [
+        "I only drank 24oz today — what should I do?",
+        "Make me a hydration schedule for tomorrow.",
+        "How do I avoid overhydration?"
+      ],
+      "rules": {
+        "ifContains": [
+          { "match": ["24oz", "dehydrated", "not drinking"], "replyKey": "hydration_low" },
+          { "match": ["overhydrated", "too much water"], "replyKey": "hydration_high" }
+        ],
+        "defaults": ["hydration_default"]
+      }
+    },
+    {
+      "id": "medicalai",
+      "name": "Ask Medical AI",
+      "emoji": "👨‍⚕️",
+      "tone": "triage-safe",
+      "disclaimer": "General medical information only. If symptoms are severe or sudden, seek urgent care.",
+      "quickPrompts": [
+        "What questions should I ask my nephrologist?",
+        "What symptoms should I watch for in CKD Stage 3?",
+        "Is this urgent: headache + high BP?"
+      ],
+      "rules": {
+        "ifContains": [
+          { "match": ["chest pain", "can't breathe", "stroke", "fainting"], "replyKey": "urgent" }
+        ],
+        "defaults": ["medical_default"]
+      }
+    }
+  ],
+
+  "replies": {
+    "nutrition_high_sodium": {
+      "title": "Stage 3 CKD Meal Swap (Lower Sodium)",
+      "bullets": [
+        "Swap fast/processed food → simple cooked meals (baked/grilled).",
+        "Aim for < 2000mg sodium/day (check labels).",
+        "Choose: fresh proteins + veggies + whole grains (portion-controlled)."
+      ],
+      "action": "Action step: Pick ONE low-sodium swap for your next meal (example: grilled chicken + rice + veggies)."
+    },
+    "nutrition_good_choice": {
+      "title": "Good direction ✅",
+      "bullets": [
+        "Grilled/baked + veggies is typically a better Stage 3 base.",
+        "Watch sauces/dressings — those hide sodium.",
+        "Keep protein moderate (your clinician’s target matters)."
+      ],
+      "action": "Action step: Keep the meal, reduce sodium add-ons (sauce/seasoning)."
+    },
+    "nutrition_default": {
+      "title": "Stage 3 CKD Nutrition Priorities",
+      "bullets": [
+        "Lower sodium, fewer processed foods.",
+        "Moderate protein portions.",
+        "Discuss potassium/phosphorus limits with your care team."
+      ],
+      "action": "Action step: Write tomorrow’s plan: 1 protein + 1 veggie + 1 carb — keep it simple."
+    },
+
+    "mental_anxiety_reset": {
+      "title": "2-Minute Anxiety Reset",
+      "bullets": [
+        "Breathe in 4 seconds, hold 2, out 6 — repeat 6 times.",
+        "Name 5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste.",
+        "Ask: 'What’s my next smallest controllable step?'"
+      ],
+      "action": "Action step: Do 6 breathing cycles right now — then message me what changed."
+    },
+    "mental_support": {
+      "title": "I’m with you — let’s stabilize first",
+      "bullets": [
+        "You’re not broken — you’re overloaded.",
+        "We’ll focus on one doable step at a time.",
+        "If you’re in danger or might harm yourself, call 988 (US) or emergency services."
+      ],
+      "action": "Action step: Tell me what you need most right now: sleep, safety, money stress, health worry, or relationships."
+    },
+    "mental_default": {
+      "title": "Stress plan (simple, repeatable)",
+      "bullets": [
+        "Sleep window: same bedtime/wake time 5 days this week.",
+        "10-minute walk after one meal daily.",
+        "Write one worry → write one action."
+      ],
+      "action": "Action step: Pick ONE habit for today (walk OR sleep OR journaling)."
+    },
+
+    "ckd_stage3_priorities": {
+      "title": "Stage 3 CKD — Your Top Priorities",
+      "bullets": [
+        "Control blood pressure (target under ~130/80 if advised).",
+        "Lower sodium, fewer processed foods.",
+        "Consistent hydration within your clinician’s guidance.",
+        "Keep appointments + labs on schedule.",
+        "Manage stress (it affects BP)."
+      ],
+      "action": "Action step: Choose ONE: log BP, prep a low-sodium meal, or plan your water schedule for today."
+    },
+
+    "bp_high": {
+      "title": "Your BP looks above target",
+      "bullets": [
+        "Sit quietly 5 minutes, feet flat, no talking.",
+        "Recheck with proper cuff placement.",
+        "If very high or symptoms (chest pain, severe headache, weakness), seek urgent care."
+      ],
+      "action": "Action step: Recheck BP in 10 minutes and log both readings."
+    },
+    "bp_howto": {
+      "title": "How to take BP correctly",
+      "bullets": [
+        "Rest 5 minutes before measuring.",
+        "Arm supported at heart level.",
+        "No caffeine/smoking/exercise for 30 minutes prior."
+      ],
+      "action": "Action step: Take 2 readings 1 minute apart and average them."
+    },
+    "bp_default": {
+      "title": "BP basics for kidney protection",
+      "bullets": [
+        "Consistency beats intensity — check at same time daily.",
+        "Lower sodium + movement helps.",
+        "Track trends, not one-off readings."
+      ],
+      "action": "Action step: Create a daily BP reminder and log tonight."
+    },
+
+    "hydration_low": {
+      "title": "Hydration looks low",
+      "bullets": [
+        "Add 8–12oz now, then reassess.",
+        "Spread intake out — don’t chug.",
+        "If you have swelling or fluid restrictions, follow your clinician."
+      ],
+      "action": "Action step: Drink 8oz and set a 45-minute reminder."
+    },
+    "hydration_high": {
+      "title": "Possible overhydration",
+      "bullets": [
+        "Pause intake briefly and reassess thirst.",
+        "If swelling/shortness of breath occurs, seek medical advice.",
+        "Stage 3 targets vary — confirm yours."
+      ],
+      "action": "Action step: Stop for 60 minutes and monitor how you feel."
+    },
+    "hydration_default": {
+      "title": "Hydration plan (Stage 3 aware)",
+      "bullets": [
+        "Aim to drink steadily through the day.",
+        "Use smaller doses (8–12oz) spaced out.",
+        "Track total and compare to your clinician’s target."
+      ],
+      "action": "Action step: Plan 4 water check-ins today."
+    },
+
+    "urgent": {
+      "title": "This may be urgent",
+      "bullets": [
+        "Symptoms like chest pain, severe breathing trouble, fainting, or stroke signs need immediate help.",
+        "Call emergency services or get to urgent care now."
+      ],
+      "action": "Action step: Stop reading and seek urgent help now."
+    },
+    "medical_default": {
+      "title": "General medical guidance (safe & useful)",
+      "bullets": [
+        "Track symptoms, timing, triggers, and what improves/worsens.",
+        "Bring medication + supplement list to appointments.",
+        "Ask your clinician for your personal targets (BP, fluids, labs)."
+      ],
+      "action": "Action step: Write 3 questions for your next appointment."
+    }
+  }
+  }
