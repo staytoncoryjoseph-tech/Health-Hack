@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Medical AI Assistant | Health Hack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Medical AI assistant for educational purposes. Track blood pressure, steps, and ask general medical questions." />
+  <meta name="description" content="Medical AI assistant for educational purposes. Prevention plans, blood pressure, steps, prescriptions, appointments, and emergency-only CPR guidance." />
 
   <style>
     :root{
@@ -28,23 +28,67 @@
     }
     .container{max-width:1100px;margin:auto;padding:24px}
     h1,h2,h3{margin:0 0 10px}
-    p{color:var(--muted); margin: 0 0 14px}
+    p{color:var(--muted); margin:0 0 14px}
     .grid{display:grid;gap:20px;grid-template-columns:1fr}
     @media(min-width:900px){.grid{grid-template-columns:1.2fr .8fr}}
+
     .card{
       background:linear-gradient(180deg,var(--card),var(--card2));
       border:1px solid var(--border);
       border-radius:18px;
       padding:20px;
     }
+
+    /* ================= AI QUICK NAV (TOP RIGHT) ================= */
+    .ai-nav{
+      position:fixed;
+      top:14px;
+      right:16px;
+      display:flex;
+      gap:10px;
+      z-index:9999;
+    }
+    .ai-btn{
+      padding:10px 16px;
+      border-radius:999px;
+      font-size:14px;
+      font-weight:800;
+      text-decoration:none;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(10,18,45,.55);
+      backdrop-filter: blur(10px);
+      box-shadow:0 10px 28px rgba(0,0,0,.45);
+      transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+      white-space:nowrap;
+    }
+    .ai-btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 14px 36px rgba(0,0,0,.55);
+      filter:brightness(1.05);
+    }
+    .ai-btn:active{transform:translateY(0)}
+    .ai-btn.medical{background:linear-gradient(135deg,#ff5f6d,#ffc371)}
+    .ai-btn.nutrition{background:linear-gradient(135deg,#56ab2f,#a8e063)}
+    .ai-btn.psych{background:linear-gradient(135deg,#6a11cb,#2575fc)}
+
+    @media(max-width:640px){
+      .ai-nav{
+        top:auto;
+        bottom:14px;
+        right:50%;
+        transform:translateX(50%);
+        flex-wrap:wrap;
+        justify-content:center;
+      }
+    }
+
     .top-row{
       display:flex; gap:12px; flex-wrap:wrap;
       align-items:center; justify-content:space-between;
       margin: 14px 0 18px;
     }
-    .pill{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-    }
+    .pill{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
     .badge{
       font-size:12px;
       padding:6px 10px;
@@ -61,6 +105,7 @@
       margin-bottom:16px;
       font-size:14px;
     }
+
     .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
     select,input,button,textarea{
       background:#0b1430;
@@ -76,27 +121,30 @@
       cursor:pointer;
       background:linear-gradient(180deg,#4da3ff,#357edd);
       border:none;
-      font-weight:600;
+      font-weight:800;
     }
     button.secondary{
       background:#0b1430;
       border:1px solid var(--border);
-      font-weight:600;
+      font-weight:800;
     }
+
     .chat-box{display:flex;flex-direction:column;height:440px}
     .messages{flex:1;overflow-y:auto;padding-right:6px}
-    .msg{margin-bottom:14px;line-height:1.45}
+    .msg{margin-bottom:14px;line-height:1.45;white-space:pre-wrap}
     .user{color:#fff}
     .ai{color:#b7d6ff}
     .system{color:var(--muted); font-size:13px}
     .input-row{display:flex;gap:10px;margin-top:12px}
     .input-row input{flex:1}
+
     .stat{
       display:flex; justify-content:space-between;
       margin-bottom:12px; font-size:15px;
     }
     .small{font-size:13px;color:var(--muted)}
     .hr{border-top:1px solid var(--border); margin:18px 0}
+
     .tipcard{
       border:1px solid var(--border);
       border-radius:16px;
@@ -106,6 +154,8 @@
     }
     .tipcard h3{font-size:16px;margin-bottom:6px}
     .tips{margin:0; padding-left:18px; color:var(--muted)}
+    .tips li{ margin:6px 0; }
+
     .flag{
       display:inline-flex; align-items:center; gap:8px;
       font-size:12px; padding:6px 10px; border-radius:999px;
@@ -113,109 +163,197 @@
       background:rgba(255,204,102,.08);
       color:var(--warn);
     }
+
+    .mini-btn{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.04);
+      color:#fff;
+      font-size:12px;
+      text-decoration:none;
+      cursor:pointer;
+      margin-left:8px;
+    }
+    .mini-btn:hover{ filter:brightness(1.08); }
   </style>
 </head>
 
 <body>
-<div class="container">
 
-  <h1>🩺 Medical AI Assistant</h1>
-  <p>General medical info + health tracking — **not a doctor**.</p>
-
-  <div class="top-row">
-    <div class="pill">
-      <span class="badge">Local-first • No Firebase</span>
-      <span class="badge">Condition-Specific Mode</span>
-      <span class="badge">Emergency keyword detection</span>
-    </div>
-
-    <div class="row">
-      <label class="small" for="conditionSelect">Condition Mode</label>
-      <select id="conditionSelect" onchange="setConditionMode(this.value)">
-        <option value="general">General</option>
-        <option value="lupus">Lupus (SLE)</option>
-        <option value="ckd3">Kidney Disease (CKD Stage 3)</option>
-        <option value="htn">High Blood Pressure (Hypertension)</option>
-        <option value="diabetes">Diabetes (General)</option>
-        <option value="stress">Anxiety / Stress</option>
-      </select>
-    </div>
+  <!-- ================= AI QUICK NAV (TOP RIGHT) ================= -->
+  <div class="ai-nav">
+    <a href="/medical/medical.html" class="ai-btn medical">Medical AI</a>
+    <a href="/meal/meal.html" class="ai-btn nutrition">Nutritionist AI</a>
+    <a href="/psych/psychologist.html" class="ai-btn psych">Psychologist AI</a>
   </div>
 
-  <div class="disclaimer">
-    <strong>Important Disclaimer:</strong><br>
-    This Medical AI is <strong>not a licensed medical professional</strong>. It does not diagnose, treat, or replace a doctor.
-    Information is for <strong>educational purposes only</strong>. If you think you’re having an emergency, call <strong>911</strong>.
-  </div>
+  <div class="container">
+    <h1>🩺 Medical AI Assistant</h1>
+    <p>Prevention-focused medical info + tracking — <strong>not a doctor</strong>.</p>
 
-  <div class="grid">
+    <div class="top-row">
+      <div class="pill">
+        <span class="badge">Local-first • No Firebase</span>
+        <span class="badge">Prevention Game Plans</span>
+        <span class="badge">RX + Appointment reminders</span>
+        <span class="badge">Emergency-only CPR</span>
+      </div>
 
-    <!-- ================= MEDICAL AI CHAT ================= -->
-    <div class="card">
-      <h2>Medical AI Chat</h2>
-      <p class="small">Ask questions. The answers will be tailored to your selected Condition Mode.</p>
+      <div class="row">
+        <label class="small" for="conditionSelect">Condition Mode</label>
+        <select id="conditionSelect" onchange="setConditionMode(this.value)">
+          <option value="general">General</option>
+          <option value="lupus">Lupus (SLE)</option>
+          <option value="ckd3">Kidney Disease (CKD Stage 3)</option>
+          <option value="htn">High Blood Pressure (Hypertension)</option>
+          <option value="diabetes">Diabetes (General)</option>
+          <option value="stress">Anxiety / Stress</option>
+        </select>
+      </div>
+    </div>
 
-      <div class="chat-box">
-        <div class="messages" id="messages"></div>
+    <div class="disclaimer">
+      <strong>Important Disclaimer:</strong><br>
+      This Medical AI is <strong>not a licensed medical professional</strong>. It does not diagnose or treat.
+      Info is for <strong>education & prevention</strong>. For emergencies call <strong>911</strong>.
+    </div>
+
+    <div class="grid">
+
+      <!-- ================= LEFT: CHAT ================= -->
+      <div class="card">
+        <h2>Medical AI Chat</h2>
+        <p class="small">Ask a question. I’ll keep it educational, prevention-focused, and safety-first.</p>
+
+        <div class="chat-box">
+          <div class="messages" id="messages"></div>
+
+          <div class="input-row">
+            <input id="userInput" placeholder="Ask a medical question…" />
+            <button onclick="sendMessage()">Ask</button>
+          </div>
+
+          <div class="row" style="margin-top:10px; justify-content:space-between;">
+            <button class="secondary" onclick="clearChat()">Clear Chat</button>
+            <span id="modeFlag" class="flag" title="Current AI scope">Mode: General</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= RIGHT: TRACKING + PLANS ================= -->
+      <div class="card">
+        <h2>Health Metrics</h2>
+
+        <h3>Blood Pressure</h3>
+        <div class="stat">
+          <span>Last Reading</span>
+          <span id="bpDisplay">Not recorded</span>
+        </div>
+        <div class="input-row">
+          <input id="systolic" inputmode="numeric" placeholder="Systolic (e.g. 120)" />
+          <input id="diastolic" inputmode="numeric" placeholder="Diastolic (e.g. 80)" />
+          <button class="secondary" onclick="saveBP()">Save</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <h3>Steps</h3>
+        <div class="stat">
+          <span>Today’s Steps</span>
+          <span id="stepsDisplay">0</span>
+        </div>
+        <div class="input-row">
+          <input id="stepsInput" inputmode="numeric" placeholder="Enter steps" />
+          <button class="secondary" onclick="saveSteps()">Save</button>
+        </div>
+        <p class="small">* Auto-tracking can be added later for mobile builds.</p>
+
+        <div class="hr"></div>
+
+        <h2>Condition Tips</h2>
+        <p class="small">Updates when you change Condition Mode.</p>
+        <div class="tipcard">
+          <h3 id="tipsTitle">General Guidance</h3>
+          <ul class="tips" id="tipsList"></ul>
+          <p class="small" id="tipsNote" style="margin-top:10px;"></p>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2>Prevention Game Plan</h2>
+        <p class="small">Pick a goal. Larry generates small missions you can actually do.</p>
 
         <div class="input-row">
-          <input id="userInput" placeholder="Ask a medical question…" />
-          <button onclick="sendMessage()">Ask</button>
+          <select id="goalSelect">
+            <option value="general">General Healthy Living</option>
+            <option value="bp">Lower Blood Pressure</option>
+            <option value="steps">Walk More</option>
+            <option value="sleep">Better Sleep</option>
+            <option value="hydration">Hydration</option>
+            <option value="stress">Stress / Anxiety</option>
+            <option value="ckd">Kidney-Friendly Habits</option>
+            <option value="lupus">Lupus-Friendly Habits</option>
+          </select>
+          <button class="secondary" onclick="generatePlan()">Generate Plan</button>
         </div>
 
-        <div class="row" style="margin-top:10px; justify-content:space-between;">
-          <button class="secondary" onclick="clearChat()">Clear Chat</button>
-          <span id="modeFlag" class="flag" title="Current AI scope">Mode: General</span>
+        <div class="tipcard">
+          <h3 id="planTitle">Today’s Missions</h3>
+          <ul class="tips" id="planList"></ul>
+          <p class="small" id="planNote" style="margin-top:10px;"></p>
         </div>
+
+        <div class="hr"></div>
+
+        <h2>Prescriptions & Due Dates</h2>
+        <p class="small">Track meds + refills locally. Not medical advice.</p>
+
+        <div class="input-row">
+          <input id="rxName" placeholder="Medication name (e.g., Lisinopril)" />
+          <input id="rxDose" placeholder="Dose (e.g., 10mg)" />
+        </div>
+        <div class="input-row">
+          <input id="rxTime" placeholder="Take time (e.g., 8:00 AM)" />
+          <input id="rxRefillDate" type="date" />
+          <button class="secondary" onclick="addRx()">Add</button>
+        </div>
+
+        <div class="tipcard">
+          <h3>My Prescriptions</h3>
+          <ul class="tips" id="rxList"></ul>
+          <p class="small">* For dosing/changes, follow your clinician’s plan.</p>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2>Appointments & Reminders</h2>
+        <p class="small">Save doctor appointments locally.</p>
+
+        <div class="input-row">
+          <input id="apptTitle" placeholder="Appointment (e.g., Nephrology follow-up)" />
+          <input id="apptDate" type="date" />
+        </div>
+        <div class="input-row">
+          <input id="apptTime" placeholder="Time (e.g., 2:30 PM)" />
+          <button class="secondary" onclick="addAppt()">Add</button>
+        </div>
+
+        <div class="tipcard">
+          <h3>My Appointments</h3>
+          <ul class="tips" id="apptList"></ul>
+        </div>
+
+        <div class="hr"></div>
+
+        <h2>Emergency Skills</h2>
+        <p class="small">CPR steps are shown only when you ask or during emergencies.</p>
+        <button class="secondary" onclick="showCPR()">Teach CPR (Emergency Only)</button>
+
       </div>
     </div>
-
-    <!-- ================= HEALTH METRICS + CONDITION TIPS ================= -->
-    <div class="card">
-      <h2>Health Metrics</h2>
-
-      <h3>Blood Pressure</h3>
-      <div class="stat">
-        <span>Last Reading</span>
-        <span id="bpDisplay">Not recorded</span>
-      </div>
-
-      <div class="input-row">
-        <input id="systolic" inputmode="numeric" placeholder="Systolic (e.g. 120)" />
-        <input id="diastolic" inputmode="numeric" placeholder="Diastolic (e.g. 80)" />
-        <button class="secondary" onclick="saveBP()">Save</button>
-      </div>
-
-      <div class="hr"></div>
-
-      <h3>Steps</h3>
-      <div class="stat">
-        <span>Today’s Steps</span>
-        <span id="stepsDisplay">0</span>
-      </div>
-
-      <div class="input-row">
-        <input id="stepsInput" inputmode="numeric" placeholder="Enter steps" />
-        <button class="secondary" onclick="saveSteps()">Save</button>
-      </div>
-
-      <p class="small">* Sensor auto-tracking can be added later for mobile builds.</p>
-
-      <div class="hr"></div>
-
-      <h2>Condition Tips</h2>
-      <p class="small">These update when you change Condition Mode.</p>
-
-      <div class="tipcard">
-        <h3 id="tipsTitle">General Guidance</h3>
-        <ul class="tips" id="tipsList"></ul>
-        <p class="small" id="tipsNote" style="margin-top:10px;"></p>
-      </div>
-
-    </div>
-
   </div>
-</div>
 
 <script>
 /* ================= STORAGE KEYS ================= */
@@ -223,6 +361,9 @@ const bpKey = "health.bp.v1";
 const stepsKey = "health.steps.v1";
 const conditionKey = "health.conditionMode.v1";
 const chatKey = "health.medicalChat.v1";
+const planKey = "health.gameplan.v1";
+const rxKey = "health.rx.v1";
+const apptKey = "health.appt.v1";
 
 /* ================= CONDITION PLAYBOOK ================= */
 const CONDITIONS = {
@@ -235,117 +376,78 @@ const CONDITIONS = {
       "For new meds/supplements, check interactions with a pharmacist or clinician.",
       "Bring a symptom timeline to appointments (when it started, triggers, what helps)."
     ],
-    note: "General info only. For diagnosis and treatment plans, consult a licensed clinician.",
-    scopeRules: [
-      "Do not diagnose. Provide possible causes and next steps.",
-      "Encourage medical evaluation for persistent or concerning symptoms.",
-      "Use plain language and safety-first guidance."
-    ]
+    note: "Educational only. For diagnosis/treatment, consult a licensed clinician."
   },
-
   lupus: {
     label: "Lupus (SLE)",
     tipsTitle: "Lupus (SLE) — Daily Focus",
     tips: [
-      "Pace activity: avoid overexertion; plan rest breaks to prevent flares.",
+      "Pace activity: plan rest breaks to help prevent flares.",
       "Sun protection matters: SPF + protective clothing; UV can trigger symptoms.",
       "Track flare signals: fatigue, joint pain, rash, fever, swelling, mouth sores.",
-      "Medication adherence is key (e.g., hydroxychloroquine if prescribed). Don’t stop meds abruptly.",
-      "Discuss vaccines/infections early—immune modulation can change risk."
+      "Medication adherence matters. Don’t stop meds abruptly without clinician guidance."
     ],
-    note: "Lupus varies widely. If you have chest pain, shortness of breath, confusion, or sudden swelling—seek urgent care.",
-    scopeRules: [
-      "Emphasize flare tracking, sun protection, fatigue/joint management, and safe questions to ask a rheumatologist.",
-      "Avoid giving medication dosing or changing prescriptions."
-    ]
+    note: "If chest pain, shortness of breath, confusion, or sudden swelling → urgent care."
   },
-
   ckd3: {
     label: "CKD Stage 3",
     tipsTitle: "CKD Stage 3 — Daily Focus",
     tips: [
-      "Blood pressure control is a big deal—log BP consistently and share with your clinician.",
-      "Hydration guidance can be personal—follow your care plan (do not over-restrict or overdo fluids).",
-      "Be cautious with NSAIDs (like ibuprofen/naproxen) unless your clinician says it’s okay.",
-      "Watch salt (sodium) and ultra-processed foods; ask about protein targets.",
-      "Get labs on schedule (eGFR, creatinine, potassium, urine protein)."
+      "Blood pressure control is key—log BP consistently.",
+      "Hydration guidance is personal—follow your care plan.",
+      "Be cautious with NSAIDs unless your clinician says it’s ok.",
+      "Watch sodium and ultra-processed foods; ask about protein targets."
     ],
-    note: "CKD advice must be individualized. Ask your clinician about potassium/phosphorus limits and medication safety.",
-    scopeRules: [
-      "Emphasize safe lifestyle themes (BP, sodium, NSAID caution, lab follow-up).",
-      "Avoid strict diet prescriptions; suggest discussing with nephrology/dietitian."
-    ]
+    note: "CKD advice must be individualized. Ask about potassium/phosphorus & medication safety."
   },
-
   htn: {
     label: "Hypertension",
     tipsTitle: "Hypertension — Daily Focus",
     tips: [
-      "Measure BP correctly: seated, relaxed, arm supported, same time daily for consistency.",
-      "Lower sodium, increase potassium-rich foods only if your clinician approves (especially if CKD).",
-      "Movement helps: regular walks + gradual fitness progression.",
-      "Sleep and stress matter—poor sleep can raise BP.",
-      "Know red flags: very high BP with chest pain, severe headache, weakness, or vision changes → emergency care."
+      "Measure BP correctly: seated, relaxed, arm supported, same time daily.",
+      "Lower sodium; movement and sleep quality can improve BP.",
+      "Know red flags: very high BP + chest pain, weakness, vision changes → urgent care."
     ],
-    note: "If BP is extremely high and you feel unwell, treat it as urgent. Don’t self-adjust prescriptions.",
-    scopeRules: [
-      "Coach measurement technique, lifestyle basics, and emergency red flags.",
-      "No medication changes or dosing advice."
-    ]
+    note: "Don’t self-adjust prescriptions. Follow your clinician plan."
   },
-
   diabetes: {
     label: "Diabetes (General)",
     tipsTitle: "Diabetes — Daily Focus",
     tips: [
-      "Build meals around fiber + protein + healthy fats to reduce glucose spikes.",
-      "Track patterns: meals, activity, sleep, stress — they all affect glucose.",
-      "Foot care matters: check daily for cuts, swelling, or redness.",
-      "Stay consistent with meds as prescribed; ask about sick-day rules.",
-      "Know low blood sugar signs (shakiness, sweating, confusion) and what your care plan says to do."
+      "Meals: fiber + protein + healthy fats help reduce spikes.",
+      "Track patterns: meals, activity, sleep, stress.",
+      "Know low sugar signs (shaking, sweating, confusion) and follow your care plan."
     ],
-    note: "Diabetes management is individualized. For dosing/insulin questions, defer to your clinician’s plan.",
-    scopeRules: [
-      "Emphasize education and pattern recognition.",
-      "Avoid insulin dosing or medication titration."
-    ]
+    note: "For dosing/insulin questions, follow your clinician’s plan."
   },
-
   stress: {
     label: "Anxiety / Stress",
     tipsTitle: "Anxiety / Stress — Daily Focus",
     tips: [
-      "Use a quick reset: slow breathing (inhale 4, exhale 6) for 2–5 minutes.",
-      "Reduce stimulants (excess caffeine/nicotine) if anxiety is high.",
-      "Track triggers and body signals (tight chest, racing thoughts, poor sleep).",
-      "Move your body daily—even a short walk helps regulate stress hormones.",
-      "If you feel unsafe or at risk of harming yourself, seek immediate help or call 988 (US)."
+      "Quick reset: inhale 4, exhale 6 for 2–5 minutes.",
+      "Reduce stimulants if anxiety is high.",
+      "Move daily. Track triggers and sleep patterns.",
+      "If you feel unsafe, seek immediate help (US: 988)."
     ],
-    note: "This isn’t therapy. If anxiety is severe or persistent, consider professional support.",
-    scopeRules: [
-      "Provide grounding techniques and support-seeking guidance.",
-      "Escalate safety concerns immediately."
-    ]
+    note: "This isn’t therapy. If severe/persistent, consider professional support."
   }
 };
 
 /* ================= EMERGENCY DETECTION ================= */
 const emergencyKeywords = [
-  "chest pain", "shortness of breath", "stroke", "seizure", "fainting",
-  "severe headache", "vision loss", "can't breathe", "suicidal", "kill myself",
-  "face drooping", "one sided weakness", "confusion", "unresponsive"
+  "chest pain","shortness of breath","stroke","seizure","fainting",
+  "severe headache","vision loss","can't breathe","cannot breathe",
+  "suicidal","kill myself","face drooping","one sided weakness","confusion","unresponsive",
+  "not breathing","no pulse","cpr","cardiac arrest"
 ];
 
-/* ================= STATE ================= */
 let currentMode = "general";
 
 /* ================= INIT ================= */
 (function init(){
   // load BP
   const bp = safeParse(localStorage.getItem(bpKey));
-  if(bp && bp.sys && bp.dia){
-    document.getElementById("bpDisplay").textContent = `${bp.sys}/${bp.dia} mmHg`;
-  }
+  if(bp && bp.sys && bp.dia) document.getElementById("bpDisplay").textContent = `${bp.sys}/${bp.dia} mmHg`;
 
   // load steps
   const steps = localStorage.getItem(stepsKey);
@@ -363,8 +465,13 @@ let currentMode = "general";
     savedChat.forEach(m => m.role === "user" ? addUser(m.text, false) : addAI(m.text, false, m.kind));
     scrollChat();
   } else {
-    addAI(`Hi. I’m your Medical AI assistant. Current mode: ${CONDITIONS[currentMode].label}. Ask me anything and I’ll keep it educational and safety-first.`, true, "system");
+    addAI(`Hi. I’m your Medical AI assistant. I focus on prevention and safety-first education. Current mode: ${CONDITIONS[currentMode].label}.`, true, "system");
   }
+
+  // load extras
+  renderRx();
+  renderAppts();
+  loadPlan();
 })();
 
 /* ================= HELPERS ================= */
@@ -373,14 +480,12 @@ function safeParse(s){ try { return JSON.parse(s); } catch { return null; } }
 function persistChat(role, text, kind="normal"){
   const arr = safeParse(localStorage.getItem(chatKey)) || [];
   arr.push({ role, text, kind, t: Date.now(), mode: currentMode });
-  localStorage.setItem(chatKey, JSON.stringify(arr.slice(-200))); // keep last 200
+  localStorage.setItem(chatKey, JSON.stringify(arr.slice(-200)));
 }
-
 function scrollChat(){
   const box = document.getElementById("messages");
   box.scrollTop = box.scrollHeight;
 }
-
 function addUser(text, persist=true){
   const div = document.createElement("div");
   div.className="msg user";
@@ -389,7 +494,6 @@ function addUser(text, persist=true){
   if(persist) persistChat("user", text);
   scrollChat();
 }
-
 function addAI(text, persist=true, kind="normal"){
   const div = document.createElement("div");
   div.className = "msg " + (kind === "system" ? "system" : "ai");
@@ -399,34 +503,247 @@ function addAI(text, persist=true, kind="normal"){
   scrollChat();
 }
 
+function renderList(ulId, items){
+  const ul = document.getElementById(ulId);
+  ul.innerHTML = "";
+  (items || []).forEach(t => {
+    const li = document.createElement("li");
+    li.textContent = t;
+    ul.appendChild(li);
+  });
+}
+
 /* ================= MODE ================= */
 function setConditionMode(mode){
   if(!CONDITIONS[mode]) mode = "general";
   currentMode = mode;
   localStorage.setItem(conditionKey, currentMode);
   applyModeUI();
-  addAI(`Condition Mode set to: ${CONDITIONS[currentMode].label}. Ask your question and I’ll tailor the guidance.`, true, "system");
+  addAI(`Condition Mode set to: ${CONDITIONS[currentMode].label}.`, true, "system");
 }
-
 function applyModeUI(){
   const info = CONDITIONS[currentMode] || CONDITIONS.general;
-
-  // mode flag
   document.getElementById("modeFlag").textContent = `Mode: ${info.label}`;
-
-  // tips
   document.getElementById("tipsTitle").textContent = info.tipsTitle;
-  const ul = document.getElementById("tipsList");
-  ul.innerHTML = "";
-  info.tips.forEach(t => {
-    const li = document.createElement("li");
-    li.textContent = t;
-    ul.appendChild(li);
-  });
+  renderList("tipsList", info.tips);
   document.getElementById("tipsNote").textContent = info.note;
 }
 
-/* ================= CHAT LOGIC ================= */
+/* ================= GAME PLAN ================= */
+function loadPlan(){
+  const saved = safeParse(localStorage.getItem(planKey));
+  if(saved && saved.items){
+    document.getElementById("planTitle").textContent = saved.title || "Today’s Missions";
+    renderList("planList", saved.items);
+    document.getElementById("planNote").textContent = saved.note || "";
+  } else {
+    generatePlan();
+  }
+}
+
+function generatePlan(){
+  const goal = document.getElementById("goalSelect").value;
+
+  const plans = {
+    general:{ title:"Today’s Missions (General)", items:[
+      "Drink water with every meal (3x).",
+      "Walk 10 minutes (or 1,000–2,000 steps).",
+      "Add 1 fruit or veggie serving.",
+      "Do 5 minutes of light stretching.",
+      "Write one symptom/energy note today."
+    ], note:"Small wins stack. Consistency beats intensity."},
+
+    bp:{ title:"Today’s Missions (Blood Pressure)", items:[
+      "Measure BP once today (seated, calm). Log it.",
+      "Swap one salty item for a lower-sodium option.",
+      "Take a 10–20 minute walk.",
+      "Do 2 minutes of slow breathing (inhale 4, exhale 6).",
+      "Plan tomorrow’s breakfast (avoid ultra-processed)."
+    ], note:"If you feel unwell with very high BP, treat it as urgent."},
+
+    steps:{ title:"Today’s Missions (Steps)", items:[
+      "Take a 5–10 minute walk after a meal.",
+      "Stand up and move for 2 minutes every hour.",
+      "Add 500 steps to your baseline.",
+      "Stretch calves/hips for 3 minutes.",
+      "Log your steps at day end."
+    ], note:"Start small; add 250–500 steps per day each week."},
+
+    sleep:{ title:"Today’s Missions (Sleep)", items:[
+      "Set a consistent bedtime window (±30 min).",
+      "No caffeine 8 hours before bed.",
+      "Dim screens 45 minutes before sleep.",
+      "Write a 3-line brain-dump before bed.",
+      "Bedroom cool + dark check."
+    ], note:"Sleep helps BP, glucose, stress, and recovery."},
+
+    hydration:{ title:"Today’s Missions (Hydration)", items:[
+      "Start day with 8–12 oz water.",
+      "Drink 8 oz with each meal.",
+      "Carry water during any outing.",
+      "Log total ounces in Water tab.",
+      "Swap one sugary drink for water."
+    ], note:"If CKD/heart failure, fluid limits can be individualized—follow your plan."},
+
+    stress:{ title:"Today’s Missions (Stress/Anxiety)", items:[
+      "2 minutes breathing: inhale 4, exhale 6.",
+      "10-minute walk (even indoors).",
+      "Do one small task to reduce chaos.",
+      "Write one worry → one next step.",
+      "Limit doom-scrolling to a set time."
+    ], note:"If you feel unsafe or at risk of self-harm, seek immediate help (US: 988)."},
+
+    ckd:{ title:"Today’s Missions (Kidney-Friendly)", items:[
+      "Log BP once today (trend tracking).",
+      "Choose one lower-sodium meal/snack.",
+      "Avoid NSAIDs unless clinician approved.",
+      "Walk 10 minutes (as tolerated).",
+      "Write 1 question for your clinician (labs/meds/diet)."
+    ], note:"Use as coaching, not a prescription. CKD plans are personal."},
+
+    lupus:{ title:"Today’s Missions (Lupus-Friendly)", items:[
+      "Sun protection check (SPF/clothing).",
+      "Pace activity: schedule 1 rest break.",
+      "Track flare signs (fatigue/joints/rash).",
+      "Gentle movement (stretch or short walk).",
+      "Plan one calming activity today."
+    ], note:"Chest pain, SOB, confusion, sudden swelling → urgent care."}
+  };
+
+  const plan = plans[goal] || plans.general;
+  document.getElementById("planTitle").textContent = plan.title;
+  renderList("planList", plan.items);
+  document.getElementById("planNote").textContent = plan.note;
+  localStorage.setItem(planKey, JSON.stringify(plan));
+}
+
+/* ================= RX TRACKING ================= */
+function addRx(){
+  const name = document.getElementById("rxName").value.trim();
+  const dose = document.getElementById("rxDose").value.trim();
+  const time = document.getElementById("rxTime").value.trim();
+  const refillDate = document.getElementById("rxRefillDate").value;
+
+  if(!name) return alert("Add a medication name.");
+
+  const arr = safeParse(localStorage.getItem(rxKey)) || [];
+  arr.push({ id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())), name, dose, time, refillDate, created: Date.now() });
+  localStorage.setItem(rxKey, JSON.stringify(arr));
+
+  document.getElementById("rxName").value="";
+  document.getElementById("rxDose").value="";
+  document.getElementById("rxTime").value="";
+  document.getElementById("rxRefillDate").value="";
+
+  renderRx();
+  addAI("Prescription saved locally on this device. (Not medical advice.)", true, "system");
+}
+
+function deleteRx(id){
+  const arr = safeParse(localStorage.getItem(rxKey)) || [];
+  localStorage.setItem(rxKey, JSON.stringify(arr.filter(x => x.id !== id)));
+  renderRx();
+}
+
+function renderRx(){
+  const ul = document.getElementById("rxList");
+  const arr = safeParse(localStorage.getItem(rxKey)) || [];
+  ul.innerHTML = "";
+  if(!arr.length){
+    const li = document.createElement("li");
+    li.textContent = "No prescriptions saved yet.";
+    ul.appendChild(li);
+    return;
+  }
+  arr.forEach(rx => {
+    const li = document.createElement("li");
+    const refillTxt = rx.refillDate ? ` • Refill: ${rx.refillDate}` : "";
+    const timeTxt = rx.time ? ` • Take: ${rx.time}` : "";
+    li.textContent = `${rx.name}${rx.dose ? " ("+rx.dose+")" : ""}${timeTxt}${refillTxt}`;
+    const del = document.createElement("button");
+    del.className = "mini-btn";
+    del.textContent = "Remove";
+    del.onclick = () => deleteRx(rx.id);
+    li.appendChild(del);
+    ul.appendChild(li);
+  });
+}
+
+/* ================= APPOINTMENTS ================= */
+function addAppt(){
+  const title = document.getElementById("apptTitle").value.trim();
+  const date = document.getElementById("apptDate").value;
+  const time = document.getElementById("apptTime").value.trim();
+
+  if(!title || !date) return alert("Add appointment title + date.");
+
+  const arr = safeParse(localStorage.getItem(apptKey)) || [];
+  arr.push({ id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())), title, date, time, created: Date.now() });
+  localStorage.setItem(apptKey, JSON.stringify(arr));
+
+  document.getElementById("apptTitle").value="";
+  document.getElementById("apptDate").value="";
+  document.getElementById("apptTime").value="";
+
+  renderAppts();
+  addAI("Appointment saved locally on this device.", true, "system");
+}
+
+function deleteAppt(id){
+  const arr = safeParse(localStorage.getItem(apptKey)) || [];
+  localStorage.setItem(apptKey, JSON.stringify(arr.filter(x => x.id !== id)));
+  renderAppts();
+}
+
+function renderAppts(){
+  const ul = document.getElementById("apptList");
+  const arr = safeParse(localStorage.getItem(apptKey)) || [];
+  ul.innerHTML = "";
+  if(!arr.length){
+    const li = document.createElement("li");
+    li.textContent = "No appointments saved yet.";
+    ul.appendChild(li);
+    return;
+  }
+  arr
+    .slice()
+    .sort((a,b) => (a.date > b.date ? 1 : -1))
+    .forEach(ap => {
+      const li = document.createElement("li");
+      li.textContent = `${ap.title} • ${ap.date}${ap.time ? " • " + ap.time : ""}`;
+      const del = document.createElement("button");
+      del.className = "mini-btn";
+      del.textContent = "Remove";
+      del.onclick = () => deleteAppt(ap.id);
+      li.appendChild(del);
+      ul.appendChild(li);
+    });
+}
+
+/* ================= CPR (EMERGENCY ONLY) ================= */
+function showCPR(){
+  addAI(
+`CPR (Emergency Only) — quick guide:
+1) Check responsiveness. Shout for help.
+2) Call 911 (or local emergency). If possible, send someone to get an AED.
+3) If not breathing normally: start chest compressions.
+4) Hands center of chest. Push hard & fast (about 100–120/min), allow full recoil.
+5) If trained, do 30 compressions + 2 breaths. If not trained, hands-only CPR is OK.
+6) Use AED ASAP and follow prompts.
+Stop only when help takes over or the person wakes/breathes normally.`,
+  true,
+  "system"
+  );
+}
+
+/* ================= CHAT ================= */
+function clearChat(){
+  if(!confirm("Clear the chat history on this device?")) return;
+  localStorage.removeItem(chatKey);
+  document.getElementById("messages").innerHTML = "";
+  addAI("Chat cleared. Prevention-first and safety-first, always.", true, "system");
+}
+
 function sendMessage(){
   const inputEl = document.getElementById("userInput");
   const input = inputEl.value.trim();
@@ -437,106 +754,33 @@ function sendMessage(){
 
   const lc = input.toLowerCase();
 
-  // emergency detection
+  // Emergency detection: show CPR only if it's truly relevant
   if(emergencyKeywords.some(k => lc.includes(k))){
-    addAI("⚠️ Your message includes signs that could be an emergency. Please seek immediate medical attention or call 911 (or local emergency number).", true, "system");
+    addAI("⚠️ This may be an emergency. Call 911 now. If someone is not breathing or has no pulse, I can show CPR steps.", true, "system");
+    if(lc.includes("not breathing") || lc.includes("no pulse") || lc.includes("cpr") || lc.includes("cardiac arrest")){
+      showCPR();
+    }
     return;
   }
 
-  // respond with rule-based, mode-specific educational guidance
-  const mode = CONDITIONS[currentMode] || CONDITIONS.general;
-
-  const response = buildResponse(input, mode);
-  addAI(response);
+  addAI(buildResponse(input, CONDITIONS[currentMode] || CONDITIONS.general));
 }
 
 function buildResponse(question, mode){
-  const q = question.toLowerCase();
-
-  // universal structure: (1) disclaimer-lite (2) likely themes (3) next steps (4) mode tips (5) red flags
-  const redFlags = [
-    "chest pain, severe shortness of breath, fainting",
-    "one-sided weakness, face drooping, confusion",
-    "severe headache with vision changes",
-    "high fever + stiff neck",
-    "uncontrolled bleeding"
-  ];
-
-  // simple topic detection
-  const topic =
-    q.includes("blood pressure") || q.includes("bp") ? "bp" :
-    q.includes("kidney") || q.includes("creatinine") || q.includes("egfr") ? "kidney" :
-    q.includes("joint") || q.includes("rash") || q.includes("flare") ? "lupus" :
-    q.includes("sugar") || q.includes("glucose") || q.includes("a1c") ? "diabetes" :
-    q.includes("anxiety") || q.includes("panic") || q.includes("stress") ? "stress" :
-    "general";
-
-  let modeGuidance = "";
-  if(mode.label.includes("Lupus")){
-    modeGuidance = "In Lupus mode: I’ll prioritize flare tracking, fatigue/joint support, sun protection, and safe questions to bring to your rheumatologist.";
-  } else if(mode.label.includes("CKD")){
-    modeGuidance = "In CKD Stage 3 mode: I’ll prioritize blood pressure control, sodium awareness, medication safety (NSAID caution), and when to follow up with labs/clinician.";
-  } else if(mode.label.includes("Hypertension")){
-    modeGuidance = "In Hypertension mode: I’ll prioritize correct BP measurement, lifestyle levers (salt, sleep, movement), and emergency red flags.";
-  } else if(mode.label.includes("Diabetes")){
-    modeGuidance = "In Diabetes mode: I’ll prioritize meals that reduce spikes, pattern tracking, and safety signals for low/high blood sugar.";
-  } else if(mode.label.includes("Anxiety")){
-    modeGuidance = "In Anxiety/Stress mode: I’ll prioritize grounding techniques, trigger tracking, and support-seeking guidance.";
-  } else {
-    modeGuidance = "In General mode: I’ll give educational explanations, common possibilities, and safe next steps—without diagnosing.";
-  }
-
-  // topic-based pointers (kept safe)
-  let topicPointers = "";
-  switch(topic){
-    case "bp":
-      topicPointers =
-        "For blood pressure questions: check technique (seated, calm, arm supported), log readings over several days, and share trends with your clinician. If your BP is extremely high AND you feel unwell (chest pain, severe headache, weakness, vision changes), treat it as urgent.";
-      break;
-    case "kidney":
-      topicPointers =
-        "For kidney concerns: avoid self-adjusting fluids or diet too aggressively; ask your clinician about sodium, protein targets, potassium/phosphorus, and medication safety (especially NSAIDs). Track BP and swelling, and keep lab follow-ups on schedule.";
-      break;
-    case "lupus":
-      topicPointers =
-        "For lupus-style symptoms: track patterns (fatigue, joint pain, rash, fever), protect from UV, pace activity, and note triggers. If you have chest pain, shortness of breath, confusion, or sudden swelling, seek urgent evaluation.";
-      break;
-    case "diabetes":
-      topicPointers =
-        "For glucose concerns: look for patterns around meals, sleep, stress, and activity. Build meals with fiber + protein to blunt spikes. If you have symptoms of very low sugar (confusion, sweating, shaking), follow your care plan and get help if severe.";
-      break;
-    case "stress":
-      topicPointers =
-        "For anxiety/stress: try a quick reset (inhale 4, exhale 6 for a few minutes), reduce stimulants, and consider structured support if it’s persistent. If you feel unsafe or at risk of self-harm, seek immediate help (US: 988).";
-      break;
-    default:
-      topicPointers =
-        "Tell me your age range, key symptoms, how long it’s been going on, any meds/supplements, and what makes it better/worse. I can help you think through safe next steps and questions for your clinician.";
-  }
-
-  // mode tips (short)
-  const tipSample = (mode.tips || []).slice(0, 3).map(t => `• ${t}`).join("\n");
-
   return [
-    "I can share general medical information, not a diagnosis.",
+    "I can share general medical education and prevention ideas, not a diagnosis.",
     "",
-    modeGuidance,
+    `Current mode: ${mode.label}.`,
     "",
-    topicPointers,
+    "To help you best, tell me:",
+    "• Age range",
+    "• Main symptoms or goal (prevention counts)",
+    "• How long it’s been going on",
+    "• Any meds/supplements",
+    "• What makes it better/worse",
     "",
-    "Mode quick tips:",
-    tipSample || "• Stay safety-first and consult a clinician for diagnosis/treatment.",
-    "",
-    "Red flags (seek urgent help): " + redFlags.join("; ") + "."
+    "If you want, say: “Make me a 7-day game plan for ___” and I’ll build it."
   ].join("\n");
-}
-
-/* ================= CHAT UTIL ================= */
-function clearChat(){
-  if(!confirm("Clear the chat history on this device?")) return;
-  localStorage.removeItem(chatKey);
-  document.getElementById("messages").innerHTML = "";
-  addAI(`Chat cleared. Current mode: ${CONDITIONS[currentMode].label}. Ask a question whenever you're ready.`, true, "system");
 }
 
 /* ================= METRICS ================= */
@@ -550,7 +794,6 @@ function saveBP(){
   document.getElementById("diastolic").value = "";
   addAI("Saved your blood pressure reading locally on this device.", true, "system");
 }
-
 function saveSteps(){
   const steps = document.getElementById("stepsInput").value.trim();
   if(!steps) return;
