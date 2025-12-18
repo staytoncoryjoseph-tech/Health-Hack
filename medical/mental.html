@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Medical AI Assistant | Health Hack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Medical AI assistant for educational purposes. Track blood pressure, steps, and ask general medical questions." />
+
+  <style>
+    :root{
+      --bg:#060a14;
+      --card:#0b1430;
+      --border:rgba(140,160,220,.15);
+      --text:#e9ecf1;
+      --muted:#9aa4c7;
+      --accent:#4da3ff;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .container{
+      max-width:1100px;
+      margin:auto;
+      padding:24px;
+    }
+
+    h1,h2,h3{margin:0 0 10px}
+    p{color:var(--muted)}
+
+    .grid{
+      display:grid;
+      gap:20px;
+      grid-template-columns:1fr;
+    }
+
+    @media(min-width:900px){
+      .grid{grid-template-columns:1.2fr .8fr}
+    }
+
+    .card{
+      background:linear-gradient(180deg,#0b1430,#070d1b);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:20px;
+    }
+
+    .disclaimer{
+      border-left:4px solid var(--danger);
+      padding:14px 16px;
+      background:rgba(255,107,107,.08);
+      margin-bottom:20px;
+      font-size:14px;
+    }
+
+    .chat-box{
+      display:flex;
+      flex-direction:column;
+      height:420px;
+    }
+
+    .messages{
+      flex:1;
+      overflow-y:auto;
+      padding-right:6px;
+    }
+
+    .msg{
+      margin-bottom:14px;
+      line-height:1.45;
+    }
+
+    .user{color:#fff}
+    .ai{color:#b7d6ff}
+
+    .input-row{
+      display:flex;
+      gap:10px;
+      margin-top:12px;
+    }
+
+    input,button{
+      background:#0b1430;
+      color:#fff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:12px 14px;
+      font-size:15px;
+    }
+
+    input{flex:1}
+
+    button{
+      cursor:pointer;
+      background:linear-gradient(180deg,#4da3ff,#357edd);
+      border:none;
+    }
+
+    button.secondary{
+      background:#0b1430;
+      border:1px solid var(--border);
+    }
+
+    .stat{
+      display:flex;
+      justify-content:space-between;
+      margin-bottom:12px;
+      font-size:15px;
+    }
+
+    .danger-text{
+      color:var(--danger);
+      font-weight:600;
+      margin-top:10px;
+    }
+
+    .small{font-size:13px;color:var(--muted)}
+  </style>
+</head>
+
+<body>
+<div class="container">
+
+  <h1>🩺 Medical AI Assistant</h1>
+  <p>General medical information, daily health tracking, and guidance — **not a doctor**.</p>
+
+  <div class="disclaimer">
+    <strong>Important Disclaimer:</strong><br>
+    This Medical AI is <strong>not a licensed medical professional</strong>.  
+    It does not diagnose, treat, or replace a doctor.  
+    Information provided is for <strong>educational and informational purposes only</strong>.  
+    If you are experiencing a medical emergency, call <strong>911</strong> immediately.
+  </div>
+
+  <div class="grid">
+
+    <!-- ================= MEDICAL AI CHAT ================= -->
+    <div class="card">
+      <h2>Medical AI Chat</h2>
+      <p class="small">Ask general medical questions (symptoms, meds, lifestyle, conditions).</p>
+
+      <div class="chat-box">
+        <div class="messages" id="messages"></div>
+
+        <div class="input-row">
+          <input id="userInput" placeholder="Ask a medical question…" />
+          <button onclick="sendMessage()">Ask</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= HEALTH METRICS ================= -->
+    <div class="card">
+      <h2>Health Metrics</h2>
+
+      <h3>Blood Pressure</h3>
+      <div class="stat">
+        <span>Last Reading</span>
+        <span id="bpDisplay">Not recorded</span>
+      </div>
+
+      <div class="input-row">
+        <input id="systolic" placeholder="Systolic (e.g. 120)" />
+        <input id="diastolic" placeholder="Diastolic (e.g. 80)" />
+        <button class="secondary" onclick="saveBP()">Save</button>
+      </div>
+
+      <hr style="border-color:var(--border);margin:20px 0">
+
+      <h3>Steps</h3>
+      <div class="stat">
+        <span>Today’s Steps</span>
+        <span id="stepsDisplay">0</span>
+      </div>
+
+      <div class="input-row">
+        <input id="stepsInput" placeholder="Enter steps" />
+        <button class="secondary" onclick="saveSteps()">Save</button>
+      </div>
+
+      <p class="small">* Sensor auto-tracking can be added later for mobile builds.</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ================= STORAGE ================= */
+const bpKey = "health.bp.v1";
+const stepsKey = "health.steps.v1";
+
+/* ================= LOAD ================= */
+(function init(){
+  const bp = JSON.parse(localStorage.getItem(bpKey));
+  if(bp){
+    document.getElementById("bpDisplay").textContent =
+      bp.sys + "/" + bp.dia + " mmHg";
+  }
+
+  const steps = localStorage.getItem(stepsKey);
+  if(steps){
+    document.getElementById("stepsDisplay").textContent = steps;
+  }
+
+  addAI("Hi. I’m your Medical AI assistant. I can provide general medical information, explain conditions, medications, and healthy habits. I am not a doctor, but I’m here to help you understand.");
+})();
+
+/* ================= CHAT ================= */
+function addUser(text){
+  const div = document.createElement("div");
+  div.className="msg user";
+  div.textContent="You: " + text;
+  messages.appendChild(div);
+}
+
+function addAI(text){
+  const div = document.createElement("div");
+  div.className="msg ai";
+  div.textContent="Medical AI: " + text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function sendMessage(){
+  const input = userInput.value.trim();
+  if(!input) return;
+  addUser(input);
+  userInput.value="";
+
+  const emergencyWords = ["chest pain","shortness of breath","stroke","seizure","fainting"];
+  if(emergencyWords.some(w => input.toLowerCase().includes(w))){
+    addAI("⚠️ Your message may indicate a medical emergency. Please seek immediate medical attention or call 911.");
+    return;
+  }
+
+  // Placeholder logic (later replaced with real AI)
+  addAI("I can share general medical information, common causes, and lifestyle considerations. For diagnosis or treatment, consult a licensed healthcare provider.");
+}
+
+/* ================= METRICS ================= */
+function saveBP(){
+  const sys = systolic.value;
+  const dia = diastolic.value;
+  if(!sys || !dia) return alert("Enter both values");
+  localStorage.setItem(bpKey, JSON.stringify({sys,dia,date:Date.now()}));
+  bpDisplay.textContent = sys + "/" + dia + " mmHg";
+  systolic.value = diastolic.value = "";
+}
+
+function saveSteps(){
+  const steps = stepsInput.value;
+  if(!steps) return;
+  localStorage.setItem(stepsKey, steps);
+  stepsDisplay.textContent = steps;
+  stepsInput.value="";
+}
+</script>
+</body>
+</html>
