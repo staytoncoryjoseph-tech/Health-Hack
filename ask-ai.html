@@ -1,138 +1,252 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Health Hack — Ask AI</title>
+  <meta charset="UTF-8" />
+  <title>Ask AI (All Specialists) | Health Hack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Pick a specialist: Psychologist AI, Medical AI, Nutritionist AI. Local-first, prevention-focused." />
+
   <style>
     :root{
-      --bg:#0b1020; --card:rgba(255,255,255,.07); --border:rgba(255,255,255,.14);
-      --text:#eaf0ff; --muted:rgba(234,240,255,.72); --blue:#2b6ff0; --green:#29d391;
-      --shadow:0 18px 45px rgba(0,0,0,.45);
+      --bg0:#050814;
+      --bg1:#060a14;
+      --panel1: rgba(9, 18, 42, .72);
+      --panel2: rgba(7, 13, 27, .72);
+      --stroke: rgba(160, 180, 255, .16);
+      --text:#e9ecf1;
+      --muted:#9aa4c7;
+
+      --psych1:#6a11cb; --psych2:#2575fc;
+      --med1:#ff5f6d;  --med2:#ffc371;
+      --nut1:#56ab2f;  --nut2:#a8e063;
+
+      --danger:#ff6b6b;
+      --warn:#ffcc66;
+      --ok:#43d19e;
     }
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto;
-      background: radial-gradient(1100px 700px at 12% 12%, rgba(43,111,240,.22), transparent 55%),
-                  radial-gradient(900px 650px at 85% 18%, rgba(41,211,145,.16), transparent 55%),
-                  linear-gradient(180deg, var(--bg), #060916);
+      margin:0;
       color:var(--text);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 700px at 10% 10%, rgba(106,17,203,.22), transparent 60%),
+        radial-gradient(900px 600px at 85% 15%, rgba(77,163,255,.18), transparent 55%),
+        radial-gradient(900px 650px at 30% 95%, rgba(86,171,47,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
     }
-    .wrap{max-width:980px;margin:0 auto;padding:20px}
+
+    .stage{min-height:100%; padding:24px; animation: stageIn .75s ease both;}
+    @keyframes stageIn{
+      from{opacity:0; transform: translateY(18px) scale(.985); filter: blur(6px)}
+      to{opacity:1; transform: translateY(0) scale(1); filter: blur(0)}
+    }
+    .wrap{max-width:1180px;margin:0 auto}
+
+    .hero{
+      border:1px solid var(--stroke);
+      border-radius:22px;
+      padding:18px 18px 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow: 0 18px 70px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.03) inset;
+      position:relative;
+      overflow:hidden;
+    }
+    .heroTop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+    .hero h1{margin:0 0 6px;font-size:28px;letter-spacing:.2px}
+    .hero p{margin:0;color:var(--muted);font-weight:600}
+
+    .pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(10,18,45,.45);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:900;
+      cursor:pointer;
+      transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+      box-shadow:0 12px 26px rgba(0,0,0,.35);
+      user-select:none;
+    }
+    .pill:hover{transform: translateY(-2px); filter:brightness(1.06)}
+    .pill:active{transform: translateY(0)}
+    .pill[data-ai="psych"]{background: linear-gradient(135deg,var(--psych1),var(--psych2))}
+    .pill[data-ai="medical"]{background: linear-gradient(135deg,var(--med1),var(--med2))}
+    .pill[data-ai="nutrition"]{background: linear-gradient(135deg,var(--nut1),var(--nut2))}
+    .pill.isActive{outline: 2px solid rgba(255,255,255,.25);}
+
+    .grid{margin-top:18px;display:grid;gap:18px;grid-template-columns:1fr;}
+    @media(min-width:980px){.grid{grid-template-columns:1fr 1fr;}}
+
     .card{
-      background: linear-gradient(180deg, var(--card), rgba(255,255,255,.03));
-      border:1px solid var(--border);
-      border-radius:18px;
-      box-shadow:var(--shadow);
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, var(--panel1), var(--panel2));
+      border-radius:22px;
+      box-shadow: 0 18px 70px rgba(0,0,0,.45);
       padding:16px;
-      margin-top:14px;
+      position:relative;
+      overflow:hidden;
     }
-    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-    .title{margin:0;font-size:22px;font-weight:900}
-    .sub{margin:6px 0 0;color:var(--muted);line-height:1.5}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
-    select, input, textarea, button{
+    .card::before{
+      content:"";
+      position:absolute; inset:-2px;
+      background: radial-gradient(800px 240px at 10% 0%, rgba(255,255,255,.07), transparent 60%);
+      opacity:.9;
+      pointer-events:none;
+    }
+    .card h2{margin:0 0 10px;font-size:18px;position:relative;z-index:1}
+    .small{color:var(--muted);font-size:13px;margin:0 0 10px;position:relative;z-index:1}
+
+    .box{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.14);
+      border-radius:18px;
+      padding:12px;
+      min-height:320px;
+      position:relative;
+      z-index:1;
+      overflow:auto;
+      white-space:pre-wrap;
+    }
+    .msg{margin:0 0 10px; line-height:1.45}
+    .msg.user{color:#fff}
+    .msg.ai{color:#b7d6ff}
+    .msg.sys{color:var(--muted);font-size:13px}
+
+    .inputRow{display:flex;gap:10px;margin-top:12px;position:relative;z-index:1}
+    input, select, textarea, button{
       border-radius:14px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      color:var(--text);
-      padding:12px 12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(9,18,42,.75);
+      color:#fff;
+      padding:12px 14px;
       font-size:15px;
       outline:none;
     }
-    textarea{width:100%;min-height:120px;resize:vertical}
+    input{flex:1}
     button{
       cursor:pointer;
+      border:none;
       font-weight:900;
+      background: linear-gradient(180deg,#4da3ff,#357edd);
+      box-shadow: 0 12px 28px rgba(0,0,0,.35);
     }
-    button.primary{
-      background: linear-gradient(180deg, rgba(43,111,240,.95), rgba(43,111,240,.75));
-      border-color: rgba(90,160,255,.55);
-    }
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    @media (max-width:900px){ .grid{grid-template-columns:1fr} }
-    .chat{
-      height:420px;
-      overflow:auto;
-      padding:12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.20);
-    }
-    .msg{
-      max-width:86%;
-      padding:12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.12);
-      margin:8px 0;
-      white-space:pre-wrap;
-      line-height:1.55;
-    }
-    .user{margin-left:auto;background: rgba(41,211,145,.12);border-color: rgba(41,211,145,.25)}
-    .ai{background: rgba(43,111,240,.14);border-color: rgba(90,160,255,.25)}
-    .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .chip{
-      padding:8px 12px;border-radius:999px;
+    button.secondary{
+      background: rgba(9,18,42,.75);
       border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      cursor:pointer;
       font-weight:900;
-      color:rgba(234,240,255,.92);
     }
-    .chip:hover{background: rgba(255,255,255,.10)}
-    .disclaimer{
-      margin-top:10px;
-      border:1px solid rgba(255,209,102,.30);
-      background: rgba(255,209,102,.10);
-      padding:12px;border-radius:16px;
-      color:rgba(234,240,255,.92);
-      font-size:13px;line-height:1.6
+    .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+    .dyn{
+      margin-top:18px;
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border-radius:22px;
+      padding:16px;
+      box-shadow: 0 18px 70px rgba(0,0,0,.40);
     }
+    .dynTop{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color:var(--muted);
+      font-size:12px;font-weight:800;
+    }
+    .twoCol{display:grid;gap:14px;margin-top:12px;grid-template-columns:1fr}
+    @media(min-width:980px){.twoCol{grid-template-columns:1fr 1fr}}
+    .panel{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.14);
+      border-radius:18px;
+      padding:12px;
+    }
+    .panel h3{margin:0 0 8px;font-size:16px}
+    .list{margin:0;padding-left:18px;color:var(--muted)}
+    .list li{margin:6px 0}
+    .danger{color:var(--danger)}
+    .warn{color:var(--warn)}
+    .ok{color:var(--ok)}
+    textarea{width:100%;min-height:90px;resize:vertical;line-height:1.4}
+
+    .foot{margin-top:10px;color:var(--muted);font-size:12px}
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="top">
-        <div>
-          <h1 class="title">Ask AI (All Specialists)</h1>
-          <p class="sub">Pick an AI specialist. Ask questions. Get Stage 3 CKD-aware action steps — powered by JSON.</p>
-        </div>
-        <div class="row">
-          <select id="aiSelect"></select>
-          <button id="btnClear">Clear</button>
+  <div class="stage">
+    <div class="wrap">
+
+      <div class="hero">
+        <div class="heroTop">
+          <div>
+            <h1>Ask AI (All Specialists)</h1>
+            <p>Pick a specialist. Ask questions. Get prevention-first action steps — powered locally.</p>
+          </div>
+
+          <div class="pills" role="tablist" aria-label="AI Specialist selector">
+            <div class="pill isActive" data-ai="psych" role="tab" aria-selected="true">🧠 AI Psychologist</div>
+            <div class="pill" data-ai="medical" role="tab" aria-selected="false">🩺 AI Medical</div>
+            <div class="pill" data-ai="nutrition" role="tab" aria-selected="false">🥗 AI Nutritionist</div>
+          </div>
         </div>
       </div>
 
-      <div class="chips" id="quickChips"></div>
-      <div class="disclaimer" id="disclaimerBox"></div>
-    </div>
+      <div class="grid">
+        <!-- LEFT: CHAT -->
+        <div class="card">
+          <h2 id="chatTitle">Chat</h2>
+          <p class="small" id="chatSub">Ask your question…</p>
 
-    <div class="grid">
-      <div class="card">
-        <div class="title" style="font-size:18px">Chat</div>
-        <div class="chat" id="chat"></div>
-        <div class="row">
-          <input id="q" style="flex:1" placeholder="Ask your question..." />
-          <button class="primary" id="btnAsk">Ask</button>
+          <div class="box" id="chatBox"></div>
+
+          <div class="inputRow">
+            <input id="chatInput" placeholder="Ask your question…" />
+            <button id="btnAsk" type="button">Ask</button>
+          </div>
+
+          <div class="btnRow">
+            <button class="secondary" id="btnClear" type="button">Clear</button>
+            <button class="secondary" id="btnDemo" type="button">Demo Prompt</button>
+          </div>
+
+          <div class="foot" id="proTip">Pro move: be specific. Example: “I slept 5 hours and I’m exhausted. Make a plan.”</div>
         </div>
-        <div class="sub" style="font-size:12px;margin-top:10px">
-          Pro move: type your exact readings like <b>142/88</b> or <b>24oz</b> and the engine will react.
+
+        <!-- RIGHT: ENGINE OUTPUT -->
+        <div class="card">
+          <h2>Engine Output</h2>
+          <p class="small" id="engineSub">Engine response will appear here…</p>
+
+          <div class="box" id="engineBox">Engine response will appear here…</div>
+
+          <div class="btnRow">
+            <button class="secondary" id="btnCopy" type="button">Copy</button>
+          </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="title" style="font-size:18px">Engine Output</div>
-        <p class="sub" id="engineMeta"></p>
-        <textarea id="engineOut" readonly placeholder="Engine response will appear here..."></textarea>
-        <div class="row">
-          <button id="btnCopy">Copy</button>
-          <button id="btnDemo" class="primary">Demo Prompt</button>
+      <!-- DYNAMIC: specialist tools -->
+      <div class="dyn">
+        <div class="dynTop">
+          <div>
+            <strong id="dynTitle">Psychologist Tools</strong>
+            <div class="foot" id="dynDesc">PQ-4, sleep tracker, support resources, and vent box.</div>
+          </div>
+          <div class="tag" id="dynTag">Local-first • Safety-first</div>
         </div>
+
+        <div id="dynBody" class="twoCol"></div>
       </div>
+
     </div>
   </div>
 
-  <script src="ask-ai.js"></script>
+  <script defer src="./ask-ai.js"></script>
 </body>
 </html>
