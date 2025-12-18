@@ -1,214 +1,307 @@
-// ---------------------------
-// UV Tracker (local-first) + Auto-location + Photosensitive Mode
-// ---------------------------
-const UV_KEY = "hh_uv_today";
-const UV_PHOTO_KEY = "hh_uv_photo_mode";
+/* ============================================================
+   uv.js — UV Engine Loader (LifeHack Health Engine)
+   Reads: /health-engine.json (YOUR schema)
+   ============================================================ */
 
-function uvDayKey(){ return new Date().toISOString().slice(0,10); }
+(() => {
+  const ENGINE_URL = "/health-engine.json";
 
-function isPhotoMode(){
-  return localStorage.getItem(UV_PHOTO_KEY) === "1";
-}
+  // ----------------- logging -----------------
+  const LEVELS = { silent: 0, error: 1, warn: 2, info: 3, debug: 4 };
+  const ts = () => new Date().toISOString();
 
-function setPhotoMode(on){
-  localStorage.setItem(UV_PHOTO_KEY, on ? "1" : "0");
-  const hint = $("uvPhotoHint");
-  if(hint) hint.textContent = on ? "Stricter guidance ON" : "Normal guidance";
-}
-
-function setUVDot(level){
-  const dot = $("uvDot");
-  if(!dot) return;
-
-  if(level == null){
-    dot.style.background = "rgba(234,240,255,.35)";
-    dot.style.boxShadow = "0 0 0 6px rgba(234,240,255,.08)";
-    return;
+  function makeLogger(level = "info") {
+    const L = LEVELS[level] ?? LEVELS.info;
+    return {
+      debug: (...a) => L >= 4 && console.log("[UV][debug]", ...a),
+      info:  (...a) => L >= 3 && console.log("[UV]", ...a),
+      warn:  (...a) => L >= 2 && console.warn("[UV][warn]", ...a),
+      error: (...a) => L >= 1 && console.error("[UV][error]", ...a),
+    };
   }
 
-  // In photosensitive mode, shift thresholds stricter
-  const photo = isPhotoMode();
-  const L = Number(level);
-
-  // thresholds:
-  // normal: <3 low, <6 moderate, else high
-  // photo:  <2.5 low, <4.5 moderate, else high
-  const lowMax = photo ? 2.5 : 3;
-  const modMax = photo ? 4.5 : 6;
-
-  if(L < lowMax){
-    dot.style.background = "rgba(41,211,145,.95)";
-    dot.style.boxShadow = "0 0 0 6px rgba(41,211,145,.12)";
-  } else if(L < modMax){
-    dot.style.background = "rgba(255,209,102,.95)";
-    dot.style.boxShadow = "0 0 0 6px rgba(255,209,102,.12)";
-  } else {
-    dot.style.background = "rgba(255,93,108,.95)";
-    dot.style.boxShadow = "0 0 0 6px rgba(255,93,108,.12)";
-  }
-}
-
-function uvAdvice(level){
-  if(level == null) return "Save a UV reading to get guidance.";
-
-  const photo = isPhotoMode();
-  const L = Number(level);
-
-  // Make advice stricter if photosensitive mode enabled
-  if(!photo){
-    if(L < 3) return "Low UV. Still consider protection if you're photosensitive. Hat + shade is an easy win.";
-    if(L < 6) return "Moderate UV. Plan shade, consider long sleeves/hat, and avoid peak sun when possible.";
-    if(L < 8) return "High UV. Prefer shade + protective clothing. Limit outdoor time during peak hours.";
-    if(L < 11) return "Very High UV. Minimize sun exposure. Prioritize shade/cover and indoor alternatives.";
-    return "Extreme UV. Avoid direct sun as much as possible and protect aggressively (shade + coverage).";
-  } else {
-    if(L < 2.5) return "Low UV (photosensitive mode). Still use shade/hat if you react strongly to UV.";
-    if(L < 4.5) return "Moderate UV (photosensitive mode). Treat this like HIGH: shade + coverage, avoid peak sun.";
-    if(L < 7) return "High UV (photosensitive mode). Strongly minimize exposure; plan indoor alternatives.";
-    if(L < 10) return "Very High UV (photosensitive mode). Avoid direct sun; maximize protective clothing/shade.";
-    return "Extreme UV (photosensitive mode). Avoid direct sun; protection is non-negotiable.";
-  }
-}
-
-function loadUV(){
-  try{
-    const raw = localStorage.getItem(UV_KEY);
-    if(!raw) return null;
-    const obj = JSON.parse(raw);
-    if(obj.day !== uvDayKey()) return null;
-    return obj;
-  }catch{ return null; }
-}
-
-function saveUV(level, source="manual"){
-  const obj = { day: uvDayKey(), level, source, ts: Date.now() };
-  localStorage.setItem(UV_KEY, JSON.stringify(obj));
-  renderUV(obj);
-}
-
-function clearUV(){
-  localStorage.removeItem(UV_KEY);
-  renderUV(null);
-}
-
-function renderUV(obj){
-  const label = $("uvLabel");
-  const desc = $("uvDesc");
-  const adviceEl = $("uvAdvice");
-  const meta = $("uvMeta");
-  if(!label || !desc || !adviceEl || !meta) return;
-
-  if(!obj){
-    label.textContent = "UV: —";
-    desc.textContent = "No reading yet";
-    adviceEl.textContent = uvAdvice(null);
-    meta.textContent = "Local-first. Saves today’s UV reading on this device.";
-    setUVDot(null);
-    return;
-  }
-
-  const lvl = Number(obj.level);
-  label.textContent = `UV: ${lvl.toFixed(1)}`;
-  desc.textContent = obj.source === "auto" ? "Auto reading" : "Manual reading";
-  adviceEl.textContent = uvAdvice(lvl);
-
-  const t = new Date(obj.ts);
-  meta.textContent = `Saved ${t.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})} • ${obj.source} • ${isPhotoMode() ? "photosensitive" : "normal"}`;
-  setUVDot(lvl);
-}
-
-// Sunscreen timer (simple local reminder)
-let uvTimer = null;
-function startUVReminder(){
-  if(uvTimer) clearInterval(uvTimer);
-  const minutes = 90; // education-only reminder cadence
-  const end = Date.now() + minutes*60*1000;
-  toast(`Sunscreen timer started (${minutes} min).`);
-  uvTimer = setInterval(() => {
-    if(Date.now() >= end){
-      clearInterval(uvTimer);
-      uvTimer = null;
-      toast("Reminder: time to reapply protection ✅");
+  // ----------------- tiny event bus -----------------
+  const Events = {
+    _map: new Map(),
+    on(name, fn) {
+      if (!this._map.has(name)) this._map.set(name, new Set());
+      this._map.get(name).add(fn);
+      return () => this._map.get(name)?.delete(fn);
+    },
+    emit(name, payload) {
+      (this._map.get(name) || []).forEach((fn) => {
+        try { fn(payload); } catch (e) { console.error("[UV][event error]", name, e); }
+      });
+      // also dispatch DOM event (handy for vanilla apps)
+      try {
+        window.dispatchEvent(new CustomEvent(name, { detail: payload }));
+      } catch {}
     }
-  }, 1000);
-}
+  };
 
-// Optional auto UV via Open-Meteo (no key)
-async function autoUV(lat, lon){
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=uv_index`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error("Auto UV fetch failed");
-  const data = await res.json();
-  const uv = data?.current?.uv_index;
-  if(uv == null) throw new Error("No UV in response");
-  return Number(uv);
-}
+  // ----------------- loaders -----------------
+  const loadCSS = (href) =>
+    new Promise((resolve, reject) => {
+      // avoid duplicates
+      if ([...document.styleSheets].some(ss => ss.href && ss.href.includes(href))) return resolve(href);
 
-// Auto-location helper
-function getMyLocation(){
-  return new Promise((resolve, reject) => {
-    if(!navigator.geolocation) return reject(new Error("Geolocation not supported"));
-    navigator.geolocation.getCurrentPosition(
-      (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-      (err) => reject(err),
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 300000 }
-    );
-  });
-}
-
-// Wire UV events
-window.addEventListener("DOMContentLoaded", () => {
-  // init photo mode toggle
-  const toggle = $("uvPhotoMode");
-  if(toggle){
-    toggle.checked = isPhotoMode();
-    setPhotoMode(toggle.checked);
-    toggle.addEventListener("change", () => {
-      setPhotoMode(toggle.checked);
-      renderUV(loadUV()); // re-evaluate advice + dot thresholds
-      toast(toggle.checked ? "Photosensitive mode ON" : "Photosensitive mode OFF");
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = href;
+      link.onload = () => resolve(href);
+      link.onerror = () => reject(new Error(`Failed CSS: ${href}`));
+      document.head.appendChild(link);
     });
+
+  const loadScript = (src) =>
+    new Promise((resolve, reject) => {
+      // avoid duplicates
+      if ([...document.scripts].some(s => s.src && s.src.includes(src))) return resolve(src);
+
+      const s = document.createElement("script");
+      s.src = src;
+      s.defer = true;
+      s.onload = () => resolve(src);
+      s.onerror = () => reject(new Error(`Failed JS: ${src}`));
+      document.head.appendChild(s);
+    });
+
+  async function preloadJSON(url) {
+    try {
+      // fetch and discard body (warm cache)
+      await fetch(url, { cache: "no-store" });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
-  renderUV(loadUV());
+  function isCSS(p) { return /\.css(\?|#|$)/i.test(p); }
+  function isJS(p)  { return /\.js(\?|#|$)/i.test(p); }
+  function isJSON(p){ return /\.json(\?|#|$)/i.test(p); }
 
-  $("btnSaveUV")?.addEventListener("click", () => {
-    const v = Number($("uvManual")?.value);
-    if(!Number.isFinite(v) || v < 0) return toast("Enter a valid UV number");
-    saveUV(v, "manual");
-    toast("UV saved ✅");
-  });
+  // ----------------- core fetch -----------------
+  async function fetchEngine() {
+    const res = await fetch(ENGINE_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error(`health-engine.json ${res.status} ${res.statusText}`);
+    return res.json();
+  }
 
-  $("btnClearUV")?.addEventListener("click", () => {
-    clearUV();
-    toast("UV cleared");
-  });
+  // ----------------- UV global -----------------
+  const UV = (window.UV = window.UV || {});
+  UV.events = UV.events || Events;
 
-  $("btnUVReminder")?.addEventListener("click", () => startUVReminder());
-
-  $("btnGeoUV")?.addEventListener("click", async () => {
-    try{
-      toast("Getting your location…");
-      const loc = await getMyLocation();
-      if($("uvLat")) $("uvLat").value = loc.lat.toFixed(4);
-      if($("uvLon")) $("uvLon").value = loc.lon.toFixed(4);
-      toast("Location loaded ✅ Now tap Auto UV.");
-    }catch(e){
-      toast("Location blocked — enter lat/lon manually.");
+  // convenience router
+  function setLocation(pathOrUrl) {
+    // If it's a full URL, just go
+    if (/^https?:\/\//i.test(pathOrUrl)) {
+      window.location.href = pathOrUrl;
+      return;
     }
-  });
+    // Make sure it starts with /
+    const p = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
+    window.location.href = p;
+  }
 
-  $("btnAutoUV")?.addEventListener("click", async () => {
-    const lat = Number($("uvLat")?.value);
-    const lon = Number($("uvLon")?.value);
-    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return toast("Enter valid lat/lon");
+  // module helper
+  function moduleList(modulesObj) {
+    return Object.values(modulesObj || {}).filter(Boolean);
+  }
 
-    try{
-      toast("Fetching UV…");
-      const uv = await autoUV(lat, lon);
-      saveUV(uv, "auto");
-      toast("Auto UV saved ✅");
-    }catch(e){
-      toast("Auto UV failed — use manual UV instead.");
+  function computeCachePlan(engineJson) {
+    const cache = engineJson.cache || {};
+    const modules = moduleList(engineJson.modules);
+
+    // Build a unified precache list: cache.core + all enabled module assets + module path pages
+    const precache = new Set([...(cache.core || [])]);
+
+    modules.forEach((m) => {
+      if (m.enabled === false) return;
+      if (m.path) precache.add(m.path);
+      (m.assets || []).forEach((a) => precache.add(a));
+    });
+
+    // Also add routing targets
+    const routes = engineJson.routing?.routes || {};
+    Object.values(routes).forEach((r) => precache.add(r));
+
+    return {
+      strategy: cache.strategy || "cache-first",
+      version: cache.version || "health-cache-v1",
+      precache: [...precache],
+      dynamic: cache.dynamic || []
+    };
+  }
+
+  async function registerServiceWorkerIfNeeded(engineJson, log) {
+    const offlineEnabled = !!engineJson.engine?.offline;
+    if (!offlineEnabled) {
+      log.info("Offline disabled (engine.offline=false) — skipping SW register.");
+      return;
     }
-  });
+    if (!("serviceWorker" in navigator)) {
+      log.warn("Service workers not supported in this browser.");
+      return;
+    }
+
+    try {
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      log.info("Service Worker registered: /sw.js");
+
+      // optional: upgrade flow
+      if (reg.waiting) reg.waiting.postMessage("SKIP_WAITING");
+
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        UV.events.emit("sw:controllerchange", { at: ts() });
+      });
+    } catch (e) {
+      log.warn("SW registration failed:", e.message);
+    }
+  }
+
+  async function loadModuleAssets(mod, log) {
+    const assets = mod.assets || [];
+    const results = [];
+
+    // Order matters: CSS first, then JSON warm, then JS last
+    const css = assets.filter(isCSS);
+    const json = assets.filter(isJSON);
+    const js  = assets.filter(isJS);
+    const other = assets.filter(a => !isCSS(a) && !isJSON(a) && !isJS(a));
+
+    for (const href of css) {
+      await loadCSS(href);
+      results.push({ type: "css", url: href });
+    }
+
+    // Warm JSON (optional)
+    for (const url of json) {
+      const ok = await preloadJSON(url);
+      results.push({ type: "json", url, warmed: ok });
+    }
+
+    for (const src of js) {
+      await loadScript(src);
+      results.push({ type: "js", url: src });
+    }
+
+    // Just warn for unknown asset types
+    for (const url of other) {
+      log.warn("Unknown asset type (not css/js/json):", url);
+      results.push({ type: "other", url });
+    }
+
+    return results;
+  }
+
+  function buildEmergencyMatcher(engineJson) {
+    const kws = engineJson.safety?.emergencyKeywords || [];
+    const normalized = kws.map(k => String(k).toLowerCase()).filter(Boolean);
+
+    return (text) => {
+      const t = String(text || "").toLowerCase();
+      return normalized.some(k => t.includes(k));
+    };
+  }
+
+  async function boot() {
+    // fetch engine first (so we know log level)
+    let json;
+    try {
+      json = await fetchEngine();
+    } catch (e) {
+      console.error("[UV] Engine load failed:", e);
+      UV.events.emit("engine:error", { message: e.message, at: ts() });
+      return;
+    }
+
+    const log = makeLogger(json.uv?.logLevel || "info");
+
+    // normalize + expose state
+    UV.engineRaw = json;
+    UV.engineMeta = {
+      name: json.engine?.name || "LifeHack Health Engine",
+      version: json.engine?.version || "0.0.0",
+      mode: json.engine?.mode || "local-first",
+      offline: !!json.engine?.offline,
+      lastUpdated: json.engine?.lastUpdated || null
+    };
+
+    UV.safety = {
+      medicalDisclaimer: !!json.safety?.medicalDisclaimer,
+      diagnosisAllowed: !!json.safety?.diagnosisAllowed,
+      emergencyBypass: !!json.safety?.emergencyBypass,
+      isEmergencyText: buildEmergencyMatcher(json)
+    };
+
+    UV.modules = json.modules || {};
+    UV.routes = json.routing?.routes || {};
+    UV.defaultModule = json.routing?.defaultModule || null;
+
+    UV.cachePlan = computeCachePlan(json);
+
+    // helper navigation
+    UV.route = (path) => setLocation(path);
+    UV.go = (moduleId) => {
+      const mod = UV.modules?.[moduleId];
+      if (!mod) throw new Error(`Unknown module: ${moduleId}`);
+      setLocation(mod.path || UV.routes?.[`/${moduleId}`] || "/");
+    };
+
+    // emit early ready
+    UV.events.emit("engine:loaded", { meta: UV.engineMeta, at: ts() });
+    log.info("Engine loaded:", UV.engineMeta);
+
+    // register SW (if offline enabled)
+    await registerServiceWorkerIfNeeded(json, log);
+
+    // auto-register modules/assets
+    const auto = !!json.uv?.autoRegisterModules;
+    if (auto) {
+      const mods = moduleList(UV.modules).filter(m => m.enabled !== false);
+
+      for (const mod of mods) {
+        try {
+          UV.events.emit("module:loading", { id: mod.id, name: mod.name, at: ts() });
+          const loaded = await loadModuleAssets(mod, log);
+
+          UV.events.emit("module:ready", {
+            id: mod.id,
+            name: mod.name,
+            type: mod.type,
+            path: mod.path,
+            loaded,
+            at: ts()
+          });
+
+          log.info(`Module ready: ${mod.id}`, loaded);
+        } catch (e) {
+          log.warn(`Module failed: ${mod.id}`, e.message);
+          UV.events.emit("module:error", { id: mod.id, message: e.message, at: ts() });
+        }
+      }
+    } else {
+      log.info("autoRegisterModules=false — skipping asset auto-load.");
+    }
+
+    // exposeState toggle
+    if (!json.uv?.exposeState) {
+      // Keep minimal public surface
+      delete UV.engineRaw;
+    }
+
+    UV.events.emit("uv:ready", { at: ts(), meta: UV.engineMeta, cachePlan: UV.cachePlan });
+    log.info("UV ready.");
+  }
+
+  // Boot gate
+  const shouldBoot = true; // your uv.boot is true; if you want, enforce it here
+  if (!shouldBoot) return;
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
+})();
+
