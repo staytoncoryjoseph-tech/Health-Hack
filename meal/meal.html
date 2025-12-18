@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Meal Log | AI Nutritionist</title>
+  <meta name="theme-color" content="#070d1b" />
+  <title>Meal Log | AI Nutritionist (Lupus-aware)</title>
   <link rel="stylesheet" href="meal.css" />
 </head>
 
@@ -14,7 +15,13 @@
         <div class="logo">🥗</div>
         <div>
           <div class="title">Meal Log</div>
-          <div class="subtitle">AI Nutritionist (Local Brain)</div>
+          <div class="subtitle">AI Nutritionist (Local Brain • Lupus-aware)</div>
+
+          <!-- LIVE DAY/TIME + LAST SAVED (wired by meal.js) -->
+          <div class="subtitle" style="margin-top:6px; display:flex; gap:10px; flex-wrap:wrap">
+            <span id="mealNow">🕒 —</span>
+            <span id="mealLastSaved">Last saved: —</span>
+          </div>
         </div>
       </div>
 
@@ -31,19 +38,23 @@
       <section class="card">
         <div class="card-head">
           <h2>Log a meal</h2>
-          <div class="muted">Photo + macros + tags. Saved locally (no Firebase).</div>
+          <div class="muted">
+            Photo + macros + tags. Saved locally (no Firebase).
+            Lupus-aware coaching is education only — not medical advice.
+          </div>
         </div>
 
         <form id="mealForm" class="form">
           <div class="row">
             <div class="field">
               <label for="mealName">Meal name</label>
-              <input id="mealName" name="mealName" placeholder="e.g., Chicken bowl" required />
+              <input id="mealName" name="mealName" placeholder="e.g., Salmon + rice bowl" required />
             </div>
 
             <div class="field">
               <label for="mealTime">Time</label>
               <input id="mealTime" name="mealTime" type="time" />
+              <div class="hint">Optional — we also save a full timestamp automatically.</div>
             </div>
           </div>
 
@@ -85,6 +96,7 @@
             <div class="field">
               <label for="sodium">Sodium (mg)</label>
               <input id="sodium" name="sodium" type="number" min="0" step="10" placeholder="Optional" />
+              <div class="hint">Helpful to notice patterns (swelling/BP awareness) — education only.</div>
             </div>
 
             <div class="field">
@@ -114,7 +126,7 @@
           <div class="row">
             <div class="field">
               <label for="tags">Tags</label>
-              <input id="tags" name="tags" placeholder="e.g., breakfast, fast-food, homemade" />
+              <input id="tags" name="tags" placeholder="e.g., breakfast, anti-inflammatory, low-sodium, homemade" />
               <div class="hint">Comma-separated. Used by the AI coach.</div>
             </div>
           </div>
@@ -122,7 +134,13 @@
           <div class="row">
             <div class="field">
               <label for="notes">Notes</label>
-              <textarea id="notes" name="notes" rows="3" placeholder="How you felt, cravings, portions, etc."></textarea>
+              <textarea
+                id="notes"
+                name="notes"
+                rows="3"
+                placeholder="How you felt (fatigue, joint pain), cravings, stress, flare feelings, salt meal, etc."
+              ></textarea>
+              <div class="hint">Optional. Notes help spot patterns (food ↔ energy/symptoms). Education only.</div>
             </div>
           </div>
 
@@ -209,8 +227,9 @@
                   <option value="general">General</option>
                   <option value="fatloss">Fat loss</option>
                   <option value="muscle">Muscle gain</option>
-                  <option value="kidney_stage3">Kidney-friendly (Stage 3)</option>
+                  <option value="lupus_support">Lupus-support (education)</option>
                 </select>
+                <div class="hint">Education-only: balanced meals, sodium awareness, steady energy support.</div>
               </div>
 
               <div class="field">
@@ -269,7 +288,7 @@
         <section class="card">
           <div class="card-head">
             <h2>AI Nutritionist</h2>
-            <div class="muted">Rule-based coaching + pattern detection (no API).</div>
+            <div class="muted">Rule-based coaching + Q&A (no API).</div>
           </div>
 
           <div class="coach">
@@ -283,7 +302,24 @@
             </div>
 
             <div class="disclaimer">
-              Not medical advice. For kidney disease or any condition, confirm targets with your clinician/dietitian.
+              Education only — not medical advice. Lupus varies person-to-person; confirm targets and restrictions with your clinician/dietitian.
+            </div>
+
+            <hr class="sep" />
+
+            <!-- ASK NUTRITIONIST CHAT -->
+            <div class="card-head" style="margin-top:10px">
+              <h3 style="margin:0">Ask the Nutritionist</h3>
+              <div class="muted">Ask a question — it replies instantly (local rules).</div>
+            </div>
+
+            <div class="coach-out" id="nutriChat" style="margin-top:10px">
+              <div class="empty">Type a question below (protein, cravings, calories, meal timing…).</div>
+            </div>
+
+            <div class="coach-row" style="margin-top:10px">
+              <input id="nutriInput" placeholder="Ask about protein, cravings, calories, meal timing…" />
+              <button class="btn btn-primary" id="nutriSend" type="button">Send</button>
             </div>
           </div>
         </section>
