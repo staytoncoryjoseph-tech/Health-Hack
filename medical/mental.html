@@ -4,266 +4,108 @@
   <meta charset="UTF-8" />
   <title>Health Hack | Medical AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Medical AI assistant with health metrics, guidance, and emergency education." />
 
-  <meta name="description"
-        content="Health Hack Medical AI provides general health guidance, tracking tools, and emergency awareness. Not a replacement for medical professionals." />
-
-  <!-- Main Styles -->
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- Medical Page Styles -->
-  <style>
-    body{
-      margin:0;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: linear-gradient(180deg,#f0f9ff,#e0f2fe);
-      color:#0f172a;
-    }
-
-    .container{
-      max-width:1100px;
-      margin:auto;
-      padding:28px;
-    }
-
-    h1{
-      color:#0284c7;
-      margin-bottom:6px;
-    }
-
-    .subtitle{
-      color:#334155;
-      margin-bottom:26px;
-    }
-
-    .card{
-      background:#fff;
-      border-radius:20px;
-      padding:26px;
-      margin-bottom:24px;
-      border:1px solid #cbd5e1;
-      box-shadow:0 10px 28px rgba(56,189,248,.25);
-    }
-
-    .metrics{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-      gap:18px;
-    }
-
-    .metric{
-      background:#f8fafc;
-      border-radius:16px;
-      padding:18px;
-      border:1px solid #e5e7eb;
-    }
-
-    .metric h3{
-      margin:0 0 6px;
-      color:#0284c7;
-      font-size:16px;
-    }
-
-    .metric p{
-      margin:0;
-      color:#334155;
-    }
-
-    .chat-box{
-      display:flex;
-      gap:10px;
-      margin-top:12px;
-    }
-
-    textarea{
-      flex:1;
-      border-radius:14px;
-      border:1px solid #cbd5e1;
-      padding:14px;
-      resize:none;
-      font-size:15px;
-    }
-
-    textarea:focus{
-      outline:none;
-      border-color:#38bdf8;
-      box-shadow:0 0 0 3px rgba(56,189,248,.25);
-    }
-
-    /* Pulse Button */
-    .pulse-btn{
-      position:relative;
-      padding:14px 22px;
-      border-radius:999px;
-      border:none;
-      background:linear-gradient(135deg,#38bdf8,#0ea5e9);
-      color:#fff;
-      font-weight:700;
-      cursor:pointer;
-      box-shadow:0 10px 28px rgba(56,189,248,.3);
-      overflow:hidden;
-    }
-
-    .pulse-btn::after{
-      content:"";
-      position:absolute;
-      inset:-8px;
-      border-radius:inherit;
-      border:2px solid rgba(56,189,248,.55);
-      opacity:0;
-      animation:pulse 1.7s ease-out infinite;
-      pointer-events:none;
-    }
-
-    @keyframes pulse{
-      0%{opacity:0;transform:scale(.92)}
-      30%{opacity:.6}
-      100%{opacity:0;transform:scale(1.18)}
-    }
-
-    /* ================= CPR SECTION ================= */
-    .cpr-section{
-      margin-top:60px;
-      padding:40px 20px 60px;
-      background:linear-gradient(180deg,#e0f2fe,#f8fafc);
-    }
-
-    .cpr-card{
-      max-width:900px;
-      margin:auto;
-      background:#fff;
-      border-radius:22px;
-      padding:32px;
-      border:1px solid #cbd5e1;
-      box-shadow:0 12px 30px rgba(56,189,248,.25);
-    }
-
-    .cpr-card h2{
-      color:#0284c7;
-      margin-bottom:8px;
-    }
-
-    .cpr-sub{
-      color:#334155;
-      margin-bottom:20px;
-    }
-
-    .cpr-steps{
-      padding-left:20px;
-    }
-
-    .cpr-steps li{
-      margin-bottom:16px;
-      line-height:1.45;
-    }
-
-    .cpr-actions{
-      margin-top:28px;
-      text-align:center;
-    }
-
-    .cpr-disclaimer{
-      margin-top:22px;
-      font-size:13px;
-      color:#64748b;
-      text-align:center;
-    }
-  </style>
+  <link rel="stylesheet" href="medical.css" />
 </head>
 
 <body>
 
-  <div class="container">
-
+  <!-- ===================== HEADER ===================== -->
+  <header class="medical-header">
     <h1>🩺 Medical AI</h1>
-    <p class="subtitle">
-      General health guidance, tracking, and emergency awareness.
-      <strong>Not a doctor.</strong> Not for diagnosis.
-    </p>
+    <p>Your AI health assistant — guidance, tracking, and emergency awareness.</p>
+  </header>
 
-    <!-- Metrics -->
-    <div class="card">
-      <h2>📊 Health Metrics</h2>
-      <div class="metrics">
-        <div class="metric">
-          <h3>Blood Pressure</h3>
-          <p>Track & log readings</p>
-        </div>
-        <div class="metric">
-          <h3>Steps</h3>
-          <p>Daily movement awareness</p>
-        </div>
-        <div class="metric">
-          <h3>Hydration</h3>
-          <p>Water intake overview</p>
-        </div>
-        <div class="metric">
-          <h3>Sleep</h3>
-          <p>Basic rest tracking</p>
-        </div>
+  <!-- ===================== DISCLAIMER ===================== -->
+  <section class="disclaimer">
+    <strong>Medical Disclaimer:</strong>
+    This AI does not provide medical diagnosis or treatment.
+    Always consult a licensed medical professional.
+    In emergencies, call <strong>911</strong>.
+  </section>
+
+  <!-- ===================== AI CHAT ===================== -->
+  <section class="ai-chat">
+    <h2>Ask Medical AI</h2>
+
+    <div class="chat-box">
+      <div class="chat-message ai">
+        Hello. I can answer general health questions, explain readings, and guide you safely.
       </div>
     </div>
 
-    <!-- Medical AI Chat -->
-    <div class="card">
-      <h2>💬 Ask the Medical AI</h2>
-      <p>
-        Ask general health questions, symptoms education, or wellness tips.
-        For emergencies, call local emergency services.
-      </p>
-
-      <div class="chat-box">
-        <textarea rows="3" placeholder="Ask a medical question..."></textarea>
-        <button class="pulse-btn">Ask</button>
-      </div>
+    <div class="chat-input">
+      <input type="text" placeholder="Ask a medical question…" />
+      <button>Send</button>
     </div>
+  </section>
 
-  </div>
+  <!-- ===================== HEALTH METRICS ===================== -->
+  <section class="metrics">
+    <h2>Health Snapshot</h2>
 
-  <!-- ================= CPR EMERGENCY SECTION ================= -->
-  <section class="cpr-section">
-    <div class="cpr-card">
-
-      <h2>🫀 CPR — Simple Steps That Save Lives</h2>
-      <p class="cpr-sub">
-        If someone collapses and is not breathing normally:
-      </p>
-
-      <ol class="cpr-steps">
-        <li><strong>Check & Call</strong><br>
-          Make sure it’s safe. Tap and shout. Call <strong>911</strong> or tell someone to.
-        </li>
-
-        <li><strong>Hands in the Center</strong><br>
-          Place both hands in the middle of the chest. Lock elbows.
-        </li>
-
-        <li><strong>Push Hard & Fast</strong><br>
-          Push about <strong>2 inches deep</strong> at
-          <strong>100–120 pushes per minute</strong>.
-          <br><em>(Think: “Stayin’ Alive”)</em>
-        </li>
-
-        <li><strong>Keep Going</strong><br>
-          Let the chest rise fully. Don’t stop unless help arrives, an AED is ready, or the person wakes up.
-        </li>
-
-        <li><strong>Use an AED if Available</strong><br>
-          Turn it on and follow voice instructions. Resume CPR immediately.
-        </li>
-      </ol>
-
-      <div class="cpr-actions">
-        <a href="tel:911" class="pulse-btn">📞 Call 911 Now</a>
+    <div class="metric-grid">
+      <div class="metric-card">
+        <span class="metric-label">Blood Pressure</span>
+        <span class="metric-value">118 / 76</span>
       </div>
 
-      <p class="cpr-disclaimer">
-        This content is for emergency awareness only and does not replace professional medical training.
-      </p>
+      <div class="metric-card">
+        <span class="metric-label">Steps Today</span>
+        <span class="metric-value">6,420</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-label">Water Intake</span>
+        <span class="metric-value">64 oz</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BOTTOM VISUALS + TEXT ===================== -->
+  <section class="bottom-visuals">
+
+    <div class="bv-card">
+
+      <div class="bv-grid">
+
+        <!-- CPR IMAGE 1 -->
+        <figure class="bv-figure">
+          <img src="assets/cpr-hands.png" alt="CPR hand placement" />
+          <figcaption>Hands placed in the center of the chest.</figcaption>
+        </figure>
+
+        <!-- CPR IMAGE 2 -->
+        <figure class="bv-figure">
+          <img src="assets/cpr-compressions.png" alt="CPR compressions" />
+          <figcaption>Push hard & fast — 100–120 compressions per minute.</figcaption>
+        </figure>
+
+      </div>
+
+      <div class="bv-text">
+        <h2>CPR Quick Guide</h2>
+
+        <ol>
+          <li>Check responsiveness (tap & shout).</li>
+          <li>Call 911 or have someone call.</li>
+          <li>Place hands mid-chest.</li>
+          <li>Push hard and fast (about 2 inches deep).</li>
+          <li>Continue until help arrives or AED is used.</li>
+        </ol>
+
+        <div class="emergency-warning">
+          🚨 <strong>Emergency Signs:</strong> chest pain, trouble breathing, fainting,
+          stroke symptoms, seizures, or severe bleeding — call <strong>911</strong> immediately.
+        </div>
+      </div>
 
     </div>
+
   </section>
 
 </body>
 </html>
+
 
