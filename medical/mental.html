@@ -60,25 +60,13 @@
       transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
       white-space:nowrap;
     }
-    .ai-btn:hover{
-      transform:translateY(-2px);
-      box-shadow:0 14px 36px rgba(0,0,0,.55);
-      filter:brightness(1.05);
-    }
+    .ai-btn:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(0,0,0,.55);filter:brightness(1.05)}
     .ai-btn:active{transform:translateY(0)}
     .ai-btn.medical{background:linear-gradient(135deg,#ff5f6d,#ffc371)}
     .ai-btn.nutrition{background:linear-gradient(135deg,#56ab2f,#a8e063)}
     .ai-btn.psych{background:linear-gradient(135deg,#6a11cb,#2575fc)}
-
     @media(max-width:640px){
-      .ai-nav{
-        top:auto;
-        bottom:14px;
-        right:50%;
-        transform:translateX(50%);
-        flex-wrap:wrap;
-        justify-content:center;
-      }
+      .ai-nav{top:auto;bottom:14px;right:50%;transform:translateX(50%);flex-wrap:wrap;justify-content:center}
     }
 
     .top-row{
@@ -133,7 +121,6 @@
     .user{color:#fff}
     .ai{color:#b7d6ff}
     .system{color:var(--muted); font-size:13px}
-
     .input-row{display:flex;gap:10px;margin-top:12px}
     .input-row input{flex:1}
 
@@ -180,11 +167,11 @@
 
 <body>
 
-  <!-- ================= AI QUICK NAV (TOP RIGHT) ================= -->
+  <!-- ================= AI QUICK NAV (Correct for /Health-Hack/) ================= -->
   <div class="ai-nav">
-    <a href="/medical/medical.html" class="ai-btn medical">Medical AI</a>
-    <a href="/meal/meal.html" class="ai-btn nutrition">Nutritionist AI</a>
-    <a href="/psych/psychologist.html" class="ai-btn psych">Psychologist AI</a>
+    <a href="/Health-Hack/medical/medical.html" class="ai-btn medical">Medical AI</a>
+    <a href="/Health-Hack/meal/meal.html" class="ai-btn nutrition">Nutritionist AI</a>
+    <a href="/Health-Hack/psych/psychologist.html" class="ai-btn psych">Psychologist AI</a>
   </div>
 
   <div class="container">
@@ -220,7 +207,7 @@
 
     <div class="grid">
 
-      <!-- ================= LEFT: CHAT ================= -->
+      <!-- LEFT: CHAT -->
       <div class="card">
         <h2>Medical AI Chat</h2>
         <p class="small">Ask a question. Answers are educational, prevention-first, and safety-focused.</p>
@@ -240,7 +227,7 @@
         </div>
       </div>
 
-      <!-- ================= RIGHT: TRACKING + PLANS ================= -->
+      <!-- RIGHT: TRACKING + PLANS -->
       <div class="card">
         <h2>Health Metrics</h2>
 
@@ -353,7 +340,7 @@
     </div>
   </div>
 
-  <!-- JS (you will create this file) -->
+  <!-- JS (same folder) -->
   <script defer src="./medical.js"></script>
 </body>
 </html>
