@@ -1,0 +1,28 @@
+{
+  "defaults": {
+    "targetSys": 130,
+    "targetDia": 80,
+    "alertSys": 180,
+    "alertDia": 120
+  },
+  "coachTemplates": {
+    "win": [
+      "You’re staying consistent. Consistency is the whole game — keep the same measurement routine and build a clean 7-day trend.",
+      "This is controlled. Don’t change five things at once — keep logging and let trends speak."
+    ],
+    "nudge": [
+      "Small correction: tighten technique (5-min rest, no talking) and log AM/PM so the data is clean.",
+      "You’re close. Focus on repeatable timing and tracking triggers (stress, pain flare, salty meals)."
+    ],
+    "warning": [
+      "This needs attention. Don’t ignore repeated high readings — capture a 7-day pattern and share it with your clinician.",
+      "Your body is sending a signal. If readings are very high or symptoms are severe, seek urgent care."
+    ]
+  },
+  "classify": {
+    "good": { "sysMax": 129, "diaMax": 79 },
+    "elevated": { "sysMin": 120, "sysMax": 129, "diaMax": 79 },
+    "high1": { "sysMin": 130, "sysMax": 139, "diaMin": 80, "diaMax": 89 },
+    "high2": { "sysMin": 140, "diaMin": 90 }
+  }
+}
