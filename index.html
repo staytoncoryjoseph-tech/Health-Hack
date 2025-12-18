@@ -13,11 +13,11 @@
   <meta property="og:type" content="website" />
 
   <!-- App Icons (optional if you have them) -->
-  <link rel="icon" href="/favicon.ico" />
-  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <link rel="icon" href="./favicon.ico" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
 
   <!-- Main Site CSS -->
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="./style.css" />
 
   <!-- Minimal fallback styles so the page never breaks -->
   <style>
@@ -31,18 +31,6 @@
       --r: 22px;
     }
     *{box-sizing:border-box}
-    <script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", async () => {
-      try {
-        const reg = await navigator.serviceWorker.register("./sw.js");
-        console.log("SW registered:", reg.scope);
-      } catch (e) {
-        console.warn("SW registration failed:", e);
-      }
-    });
-  }
-</script>
     body{
       margin:0; color:var(--text);
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -146,7 +134,7 @@
   </style>
 
   <!-- UV Engine Loader (reads health-engine.json and registers modules/SW) -->
-  <script defer src="/uv.js"></script>
+  <script defer src="./uv.js"></script>
 </head>
 
 <body>
@@ -162,9 +150,9 @@
       </div>
 
       <nav class="pillrow" aria-label="Primary actions">
-        <a class="pill primary" href="/meal/meal.html">🥗 Meal Log</a>
-        <a class="pill" href="/bp/bp.html">🩺 BP Monitor</a>
-        <a class="pill" href="/ask-ai.html">🤖 Ask AI</a>
+        <a class="pill primary" href="./meal/meal.html">🥗 Meal Log</a>
+        <a class="pill" href="./bp/bp.html">🩺 BP Monitor</a>
+        <a class="pill" href="./ask-ai.html">🤖 Ask AI</a>
         <button class="pill ghost" id="btnRefreshEngine" type="button" title="Refresh engine + warm cache">
           ♻️ Refresh
         </button>
@@ -276,14 +264,26 @@
     </footer>
   </div>
 
+  <!-- Service Worker registration (NOT inside <style>) -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", async () => {
+        try {
+          const reg = await navigator.serviceWorker.register("./sw.js");
+          console.log("SW registered:", reg.scope);
+        } catch (e) {
+          console.warn("SW registration failed:", e);
+        }
+      });
+    }
+  </script>
+
   <!-- Page logic -->
   <script>
     (function(){
       const $ = (id) => document.getElementById(id);
-
       const safeSet = (el, txt) => { if (el) el.textContent = txt; };
 
-      // clickable tiles
       function makeTile(tileId, href){
         const el = $(tileId);
         if (!el) return;
@@ -293,28 +293,24 @@
           if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); }
         });
       }
-      makeTile("tileMeal", "/meal/meal.html");
-      makeTile("tileBP", "/bp/bp.html");
-      makeTile("tileAsk", "/ask-ai.html");
 
-      // year
+      makeTile("tileMeal", "./meal/meal.html");
+      makeTile("tileBP", "./bp/bp.html");
+      makeTile("tileAsk", "./ask-ai.html");
+
       safeSet($("year"), String(new Date().getFullYear()));
 
-      // refresh engine button (talks to SW if available)
       $("btnRefreshEngine")?.addEventListener("click", async () => {
         try{
-          // Ask SW to refresh engine + warm cache
           if (navigator.serviceWorker?.controller) {
-            navigator.serviceWorker.controller.postMessage("UV_REFRESH_ENGINE");
+            navigator.serviceWorker.controller.postMessage({ type: "SW_REFRESH_CACHE" });
           }
-          // Soft reload to re-run uv.js quickly
           setTimeout(() => location.reload(), 450);
         } catch {
           location.reload();
         }
       });
 
-      // network status
       function updateNet(){
         safeSet($("netStatus"), navigator.onLine ? "online" : "offline");
         const chip = $("chipOnline");
@@ -326,7 +322,6 @@
       window.addEventListener("offline", updateNet);
       updateNet();
 
-      // service worker status
       async function updateSW(){
         const el = $("swStatus");
         if (!el) return;
@@ -336,7 +331,6 @@
       navigator.serviceWorker?.addEventListener("controllerchange", updateSW);
       updateSW();
 
-      // When UV is ready, paint UI from engine
       window.addEventListener("uv:ready", (ev) => {
         const meta = ev.detail?.meta || window.UV?.engineMeta || {};
         safeSet($("engineName"), meta.name || "LifeHack Health Engine");
@@ -345,7 +339,6 @@
         safeSet($("engineUpdated"), meta.lastUpdated || "—");
         safeSet($("engineMeta"), `${meta.mode || "local-first"} • ${meta.offline ? "Offline-ready" : "Online"} • AI-guided`);
 
-        // Safety flags
         const dxAllowed = !!window.UV?.safety?.diagnosisAllowed;
         safeSet($("dxAllowed"), dxAllowed ? "allowed" : "blocked");
         $("chipDx")?.classList.toggle("warn", !dxAllowed);
@@ -354,7 +347,6 @@
         safeSet($("emergencyBypass"), eb ? "on" : "off");
       });
 
-      // Emergency keyword tester
       const input = $("emergencyInput");
       const out = $("emergencyMatch");
       const chip = $("emergencyResult");
