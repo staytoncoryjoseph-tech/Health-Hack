@@ -1,0 +1,85 @@
+{
+  "app": {
+    "name": "Health Hack Medical AI",
+    "version": "1.0.0",
+    "mode": "education-only",
+    "lastUpdated": "2025-12-18"
+  },
+
+  "safety": {
+    "medicalDisclaimer": true,
+    "diagnosisAllowed": false,
+    "emergencyBypass": true,
+    "emergencyMessage": "This may be an emergency. Call 911 immediately. Stay with someone and follow dispatcher instructions.",
+    "emergencyKeywords": [
+      "chest pain",
+      "shortness of breath",
+      "can't breathe",
+      "cannot breathe",
+      "stroke",
+      "face droop",
+      "slurred speech",
+      "seizure",
+      "fainting",
+      "passed out",
+      "severe bleeding",
+      "overdose",
+      "suicide",
+      "kill myself"
+    ]
+  },
+
+  "chat": {
+    "welcomeMessage": "Hello. I can provide general health information and safety guidance. I do not diagnose or treat conditions.",
+    "defaultResponse": "I can help with general health information. If symptoms are severe, sudden, or concerning, seek urgent medical care.",
+    "saveChatToFirestore": false
+  },
+
+  "responses": {
+    "bloodPressure": {
+      "keywords": ["blood pressure", "bp", "118/76"],
+      "response": "118/76 is generally considered a normal blood pressure range for many adults. Blood pressure can change with stress, pain, caffeine, hydration, and activity."
+    },
+    "hydration": {
+      "keywords": ["water", "hydration", "drink"],
+      "response": "Hydration needs vary. A common approach is sipping water throughout the day and monitoring urine color. If you have kidney or heart conditions, follow your clinician’s guidance."
+    },
+    "cpr": {
+      "keywords": ["cpr", "compressions"],
+      "response": "CPR basics: Call 911, place hands mid-chest, push hard and fast (100–120/min), allow full chest recoil, and continue until help arrives or an AED is used."
+    },
+    "steps": {
+      "keywords": ["steps", "walking"],
+      "response": "Daily steps are a good baseline for activity. If you share your goal (general health, endurance, weight loss), I can suggest a safe target."
+    }
+  },
+
+  "metrics": {
+    "bloodPressure": {
+      "enabled": true,
+      "demoMode": true,
+      "normalRange": {
+        "systolicMin": 90,
+        "systolicMax": 120,
+        "diastolicMin": 60,
+        "diastolicMax": 80
+      }
+    },
+    "steps": {
+      "enabled": true,
+      "source": "local",
+      "dailyGoal": 8000
+    },
+    "water": {
+      "enabled": true,
+      "unit": "oz",
+      "dailyGoal": 80
+    }
+  },
+
+  "ui": {
+    "showCPRSection": true,
+    "showEmergencyBanner": true,
+    "theme": "sky-blue-silver"
+  }
+}
