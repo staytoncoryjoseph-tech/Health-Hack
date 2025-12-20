@@ -1,367 +1,193 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#070d1b" />
-  <title>LifeHack Health Engine</title>
-  <meta name="description" content="LifeHack Health Engine — local-first health tracking with AI Nutritionist, BP Monitor, and Ask AI guidance." />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0b1e33" />
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="LifeHack Health Engine" />
-  <meta property="og:description" content="Local-first health tracking + AI guidance. Meal logging, Blood Pressure monitor, and Ask AI." />
-  <meta property="og:type" content="website" />
+  <title>Health Hack | Medical AI</title>
+  <meta name="description" content="Medical AI assistant with health metrics, guidance, and emergency education." />
 
-  <!-- App Icons (optional if you have them) -->
-  <link rel="icon" href="./favicon.ico" />
-  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-
-  <!-- Main Site CSS -->
-  <link rel="stylesheet" href="./style.css" />
-
-  <!-- Minimal fallback styles so the page never breaks -->
-  <style>
-    :root{
-      --bg0:#060a14; --bg1:#070d1b; --panel:rgba(14,24,56,.62);
-      --panel2:rgba(10,18,45,.78); --border:rgba(150,170,220,.16);
-      --text:#eaf0ff; --muted:rgba(234,240,255,.72);
-      --good:rgba(54, 215, 183, .18); --warn:rgba(255, 214, 102, .18);
-      --bad:rgba(255, 107, 107, .18);
-      --shadow: 0 22px 70px rgba(0,0,0,.45);
-      --r: 22px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: radial-gradient(1200px 700px at 20% 10%, rgba(82,124,255,.20), transparent 60%),
-                  radial-gradient(900px 600px at 85% 20%, rgba(54,215,183,.14), transparent 55%),
-                  radial-gradient(800px 500px at 50% 90%, rgba(255,214,102,.10), transparent 55%),
-                  linear-gradient(180deg, var(--bg1), var(--bg0));
-      min-height:100vh;
-    }
-    a{color:inherit}
-    .container{max-width:1100px; margin:0 auto; padding:22px}
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between; gap:14px;
-      padding:16px 18px; border:1px solid var(--border); border-radius:var(--r);
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      box-shadow: var(--shadow);
-      position: sticky; top: 14px; backdrop-filter: blur(10px);
-      z-index: 10;
-    }
-    .brand{display:flex; align-items:center; gap:12px}
-    .logo{
-      width:44px; height:44px; border-radius:16px;
-      background: radial-gradient(circle at 30% 30%, rgba(82,124,255,.9), rgba(54,215,183,.55) 48%, rgba(0,0,0,.0) 70%),
-                  rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 18px 60px rgba(82,124,255,.18);
-    }
-    .brand h1{font-size:15px; margin:0; letter-spacing:.2px}
-    .brand p{margin:2px 0 0; font-size:12px; color:var(--muted)}
-    .pillrow{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
-    .pill{
-      appearance:none; border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.05);
-      color: var(--text);
-      padding:10px 14px; border-radius:999px;
-      font-weight:650; font-size:13px; cursor:pointer;
-      transition: transform .12s ease, background .12s ease, border-color .12s ease;
-      text-decoration:none; display:inline-flex; align-items:center; gap:8px;
-    }
-    .pill:hover{transform: translateY(-1px); background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.22)}
-    .pill:active{transform: translateY(0px) scale(.99)}
-    .pill.primary{
-      background: linear-gradient(135deg, rgba(82,124,255,.35), rgba(54,215,183,.20));
-      border-color: rgba(82,124,255,.35);
-    }
-    .pill.ghost{background: rgba(255,255,255,.03)}
-    .hero{
-      margin-top:18px;
-      display:grid; grid-template-columns: 1.25fr .75fr; gap:16px;
-    }
-    @media (max-width: 920px){ .hero{grid-template-columns:1fr} .pillrow{justify-content:flex-start} }
-    .card{
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
-      padding: 18px;
-    }
-    .headline{font-size:34px; line-height:1.08; margin:0 0 10px}
-    .sub{color:var(--muted); margin:0 0 14px; font-size:14px; line-height:1.6}
-    .grid{
-      display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-top:14px;
-    }
-    @media (max-width: 920px){ .grid{grid-template-columns:1fr} }
-    .tile{
-      border:1px solid var(--border);
-      background: rgba(10,18,45,.62);
-      border-radius: 18px;
-      padding: 14px;
-      transition: transform .12s ease, border-color .12s ease, background .12s ease;
-      cursor: pointer;
-    }
-    .tile:hover{transform: translateY(-2px); border-color: rgba(255,255,255,.22); background: rgba(14,24,56,.70)}
-    .tile h3{margin:0; font-size:15px}
-    .tile p{margin:8px 0 0; color:var(--muted); font-size:12.5px; line-height:1.55}
-    .meta{
-      display:flex; flex-wrap:wrap; gap:10px; margin-top:12px;
-    }
-    .chip{
-      font-size:12px; color:var(--muted);
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.03);
-      padding:8px 10px; border-radius: 999px;
-      display:inline-flex; gap:8px; align-items:center;
-    }
-    .chip.good{background: var(--good)}
-    .chip.warn{background: var(--warn)}
-    .chip.bad{background: var(--bad)}
-    .sectionTitle{margin:0 0 8px; font-size:14px; letter-spacing:.2px}
-    .small{font-size:12px; color:var(--muted); line-height:1.6; margin:0}
-    .hr{height:1px; background: rgba(255,255,255,.08); margin:14px 0}
-    .kbd{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size:11px;
-      padding: 2px 6px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.25);
-      color: rgba(234,240,255,.8);
-    }
-  </style>
-
-  <!-- UV Engine Loader (reads health-engine.json and registers modules/SW) -->
-  <script defer src="./uv.js"></script>
+  <!-- CSS (same folder: /medical/medical.css) -->
+  <link rel="stylesheet" href="./medical.css" />
 </head>
 
 <body>
-  <div class="container">
-    <!-- TOP BAR -->
-    <header class="topbar">
-      <div class="brand" role="banner" aria-label="LifeHack Health Engine">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <h1 id="engineName">LifeHack Health Engine</h1>
-          <p id="engineMeta">Local-first • Offline-ready • AI-guided</p>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <div class="page">
+
+    <!-- ===================== HEADER ===================== -->
+    <header class="medical-header" role="banner">
+      <div class="container">
+        <div class="header-row">
+          <div class="brand">
+            <span class="brand-badge" aria-hidden="true">🩺</span>
+            <div class="brand-text">
+              <h1 class="brand-title">Medical AI</h1>
+              <p class="brand-subtitle">Health Hack • Guidance, tracking, and emergency awareness</p>
+            </div>
+          </div>
+
+          <nav class="top-nav" aria-label="Medical AI navigation">
+            <a class="nav-link" href="../index.html">Home</a>
+            <a class="nav-link" href="#chat">Ask AI</a>
+            <a class="nav-link" href="#snapshot">Snapshot</a>
+            <a class="nav-link" href="#cpr">CPR</a>
+          </nav>
         </div>
       </div>
-
-      <nav class="pillrow" aria-label="Primary actions">
-        <a class="pill primary" href="./meal/meal.html">🥗 Meal Log</a>
-        <a class="pill" href="./bp/bp.html">🩺 BP Monitor</a>
-        <a class="pill" href="./ask-ai.html">🤖 Ask AI</a>
-        <button class="pill ghost" id="btnRefreshEngine" type="button" title="Refresh engine + warm cache">
-          ♻️ Refresh
-        </button>
-      </nav>
     </header>
 
-    <!-- HERO -->
-    <main class="hero" role="main">
-      <section class="card" aria-label="Overview">
-        <h2 class="headline">Track your health like an operator.</h2>
-        <p class="sub">
-          This is a <b>local-first</b> health toolkit. Your logs live on your device by default.
-          AI gives <b>education + pattern insights</b> — not diagnoses.
-        </p>
+    <!-- ===================== MAIN ===================== -->
+    <main id="main" class="main" role="main">
 
-        <div class="meta" aria-label="Status chips">
-          <span class="chip" id="chipVersion">🧠 Engine: <span class="kbd" id="engineVersion">v1</span></span>
-          <span class="chip good" id="chipOffline">📦 Offline: <span class="kbd" id="offlineStatus">ready</span></span>
-          <span class="chip" id="chipMode">⚙️ Mode: <span class="kbd" id="engineMode">local-first</span></span>
-          <span class="chip" id="chipUpdated">🗓 Updated: <span class="kbd" id="engineUpdated">—</span></span>
-        </div>
-
-        <div class="grid" aria-label="Modules">
-          <div class="tile" id="tileMeal" role="button" tabindex="0" aria-label="Open AI Nutritionist meal log">
-            <h3>🥗 AI Nutritionist</h3>
-            <p>
-              Photo meal logging + pattern detection. Tracks macros, routines, and “what worked last week”.
-              <b>Non-medical</b> coaching only.
-            </p>
-          </div>
-
-          <div class="tile" id="tileBP" role="button" tabindex="0" aria-label="Open blood pressure monitor">
-            <h3>🩺 Blood Pressure Monitor</h3>
-            <p>
-              Record readings, view trends, and flag “too high” patterns.
-              Includes <b>lupus risk awareness</b> language — still <b>non-diagnostic</b>.
-            </p>
-          </div>
-
-          <div class="tile" id="tileAsk" role="button" tabindex="0" aria-label="Open Ask AI assistant">
-            <h3>🤖 Ask AI</h3>
-            <p>
-              Education + navigation. It helps you interpret your logs, understand terms,
-              and choose next steps (not medical instructions).
-            </p>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <h3 class="sectionTitle">Safety rules</h3>
-        <p class="small" id="medicalDisclaimer">
-          <b>Medical Disclaimer:</b> This tool provides education and tracking support. It does not diagnose,
-          treat, or replace a licensed clinician. If you believe you’re having an emergency, call your local
-          emergency number immediately.
-        </p>
-
-        <div class="meta" style="margin-top:10px">
-          <span class="chip warn" id="chipDx">🛑 Diagnosis: <span class="kbd" id="dxAllowed">blocked</span></span>
-          <span class="chip" id="chipEmergency">🚨 Emergency bypass: <span class="kbd" id="emergencyBypass">on</span></span>
+      <!-- ===================== DISCLAIMER ===================== -->
+      <section class="disclaimer" aria-labelledby="disclaimerTitle">
+        <div class="container">
+          <h2 id="disclaimerTitle" class="sr-only">Medical disclaimer</h2>
+          <p class="disclaimer-text">
+            <strong>Medical Disclaimer:</strong>
+            This AI does not provide medical diagnosis or treatment.
+            Always consult a licensed medical professional.
+            In emergencies, call <strong>911</strong>.
+          </p>
         </div>
       </section>
 
-      <!-- RIGHT PANEL -->
-      <aside class="card" aria-label="Quick tools">
-        <h3 class="sectionTitle">Quick tools</h3>
-        <p class="small">
-          Your engine can warm modules automatically. If something doesn’t load, hit <span class="kbd">Refresh</span>.
-        </p>
+      <!-- ===================== AI CHAT ===================== -->
+      <section id="chat" class="ai-chat" aria-labelledby="chatTitle">
+        <div class="container">
+          <header class="section-head">
+            <h2 id="chatTitle">Ask Medical AI</h2>
+            <p class="section-note">General info only • Not medical advice</p>
+          </header>
 
-        <div class="hr"></div>
+          <div class="chat-box" id="chatBox" aria-live="polite" aria-relevant="additions text">
+            <article class="chat-message ai" aria-label="Medical AI message">
+              Hello. I can provide general health information and safety guidance.
+              If you think you are having an emergency, call 911.
+            </article>
+          </div>
 
-        <h3 class="sectionTitle">Emergency keyword test</h3>
-        <p class="small">Type a phrase. If it matches emergency keywords, the UI will warn you.</p>
+          <form class="chat-input" id="chatForm" autocomplete="off">
+            <label class="sr-only" for="chatInput">Ask a medical question</label>
+            <input
+              id="chatInput"
+              name="chatInput"
+              type="text"
+              inputmode="text"
+              placeholder="Ask a medical question…"
+              aria-describedby="chatHelp"
+            />
+            <button id="chatSend" type="submit">Send</button>
+          </form>
 
-        <div style="margin-top:10px; display:grid; gap:10px">
-          <input
-            id="emergencyInput"
-            placeholder="Example: chest pain or very high blood pressure"
-            style="
-              width:100%; padding:12px 12px; border-radius:14px;
-              border:1px solid rgba(255,255,255,.14);
-              background: rgba(0,0,0,.22);
-              color: var(--text);
-              outline:none;
-            "
-          />
-          <div class="chip" id="emergencyResult">🧪 Result: <span class="kbd" id="emergencyMatch">—</span></div>
+          <p id="chatHelp" class="chat-mini-note">
+            Try: “What does 118/76 mean?”, “How much water should I drink?”, “What are stroke warning signs?”
+          </p>
         </div>
+      </section>
 
-        <div class="hr"></div>
+      <!-- ===================== HEALTH SNAPSHOT ===================== -->
+      <section id="snapshot" class="metrics" aria-labelledby="snapshotTitle">
+        <div class="container">
+          <header class="section-head">
+            <h2 id="snapshotTitle">Health Snapshot</h2>
+            <p class="section-note">Demo values • Replace with real sensors later</p>
+          </header>
 
-        <h3 class="sectionTitle">Offline + cache</h3>
-        <p class="small">
-          When offline, your last cached pages still open. That’s the whole point of local-first.
-        </p>
+          <div class="metric-grid" role="list">
+            <article class="metric-card" role="listitem" aria-label="Blood pressure card">
+              <h3 class="metric-label">Blood Pressure</h3>
+              <p class="metric-value" id="bpValue" aria-live="polite">118 / 76</p>
+              <button class="metric-btn" id="bpBtn" type="button">Press wrist sensor</button>
+              <p class="metric-sub">Demo reading • Not a medical device</p>
+            </article>
 
-        <div class="meta" style="margin-top:10px">
-          <span class="chip" id="chipOnline">🌐 Network: <span class="kbd" id="netStatus">checking…</span></span>
-          <span class="chip" id="chipSW">🧰 SW: <span class="kbd" id="swStatus">checking…</span></span>
+            <article class="metric-card" role="listitem" aria-label="Steps today card">
+              <h3 class="metric-label">Steps Today</h3>
+              <p class="metric-value" id="stepsValue" aria-live="polite">6,420</p>
+              <p class="metric-sub">Auto from phone later</p>
+            </article>
+
+            <article class="metric-card" role="listitem" aria-label="Water intake card">
+              <h3 class="metric-label">Water Intake</h3>
+              <p class="metric-value" id="waterValue" aria-live="polite">64 oz</p>
+              <p class="metric-sub">Synced from Water page later</p>
+            </article>
+          </div>
         </div>
-      </aside>
+      </section>
+
+      <!-- ===================== CPR / BOTTOM VISUALS ===================== -->
+      <section id="cpr" class="bottom-visuals" aria-labelledby="cprTitle">
+        <div class="container">
+          <article class="bv-card">
+            <header class="section-head">
+              <h2 id="cprTitle">CPR Quick Guide</h2>
+              <p class="section-note">Education • Emergency-first</p>
+            </header>
+
+            <div class="bv-grid">
+              <figure class="bv-figure">
+                <img
+                  src="../assets/cpr-hands.png"
+                  alt="CPR hand placement in the center of the chest"
+                  loading="lazy"
+                />
+                <figcaption>Hands placed in the center of the chest.</figcaption>
+              </figure>
+
+              <figure class="bv-figure">
+                <img
+                  src="../assets/cpr-compressions.png"
+                  alt="CPR compressions demonstrating push hard and fast"
+                  loading="lazy"
+                />
+                <figcaption>Push hard & fast — 100–120 compressions/min.</figcaption>
+              </figure>
+            </div>
+
+            <div class="bv-text">
+              <h3 class="sr-only">CPR steps</h3>
+              <ol class="bv-steps">
+                <li><strong>Check responsiveness</strong> (tap & shout).</li>
+                <li><strong>Call 911</strong> (or have someone call). Send for an AED if available.</li>
+                <li><strong>Hands mid-chest</strong>, arms straight.</li>
+                <li><strong>Push hard & fast</strong> (about 2 inches deep), 100–120/min.</li>
+                <li><strong>Keep going</strong> until help arrives or AED is used.</li>
+              </ol>
+
+              <aside class="emergency-warning" role="note" aria-label="Emergency warning">
+                🚨 <strong>Emergency signs:</strong> chest pain, trouble breathing, fainting,
+                stroke symptoms (face droop, arm weakness, speech trouble), seizures,
+                or severe bleeding — call <strong>911</strong> immediately.
+              </aside>
+            </div>
+          </article>
+        </div>
+      </section>
+
     </main>
 
-    <footer class="container" style="padding: 18px 22px 34px">
-      <p class="small">
-        © <span id="year"></span> LifeHack Health Engine • Built for momentum. Built for real life.
-      </p>
+    <!-- ===================== FOOTER ===================== -->
+    <footer class="footer" role="contentinfo">
+      <div class="container">
+        <p class="footer-text">
+          © <span id="year"></span> Health Hack • Medical AI is for education and general information only.
+        </p>
+      </div>
     </footer>
+
   </div>
 
-  <!-- Service Worker registration (NOT inside <style>) -->
+  <!-- Module JS (same folder: /medical/medical.js) -->
+  <script type="module" src="./medical.js"></script>
+
   <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", async () => {
-        try {
-          const reg = await navigator.serviceWorker.register("./sw.js");
-          console.log("SW registered:", reg.scope);
-        } catch (e) {
-          console.warn("SW registration failed:", e);
-        }
-      });
-    }
-  </script>
-
-  <!-- Page logic -->
-  <script>
-    (function(){
-      const $ = (id) => document.getElementById(id);
-      const safeSet = (el, txt) => { if (el) el.textContent = txt; };
-
-      function makeTile(tileId, href){
-        const el = $(tileId);
-        if (!el) return;
-        const go = () => (window.location.href = href);
-        el.addEventListener("click", go);
-        el.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); }
-        });
-      }
-
-      makeTile("tileMeal", "./meal/meal.html");
-      makeTile("tileBP", "./bp/bp.html");
-      makeTile("tileAsk", "./ask-ai.html");
-
-      safeSet($("year"), String(new Date().getFullYear()));
-
-      $("btnRefreshEngine")?.addEventListener("click", async () => {
-        try{
-          if (navigator.serviceWorker?.controller) {
-            navigator.serviceWorker.controller.postMessage({ type: "SW_REFRESH_CACHE" });
-          }
-          setTimeout(() => location.reload(), 450);
-        } catch {
-          location.reload();
-        }
-      });
-
-      function updateNet(){
-        safeSet($("netStatus"), navigator.onLine ? "online" : "offline");
-        const chip = $("chipOnline");
-        if (!chip) return;
-        chip.classList.remove("good","warn","bad");
-        chip.classList.add(navigator.onLine ? "good" : "warn");
-      }
-      window.addEventListener("online", updateNet);
-      window.addEventListener("offline", updateNet);
-      updateNet();
-
-      async function updateSW(){
-        const el = $("swStatus");
-        if (!el) return;
-        if (!("serviceWorker" in navigator)) { safeSet(el, "unsupported"); return; }
-        safeSet(el, navigator.serviceWorker.controller ? "active" : "loading…");
-      }
-      navigator.serviceWorker?.addEventListener("controllerchange", updateSW);
-      updateSW();
-
-      window.addEventListener("uv:ready", (ev) => {
-        const meta = ev.detail?.meta || window.UV?.engineMeta || {};
-        safeSet($("engineName"), meta.name || "LifeHack Health Engine");
-        safeSet($("engineVersion"), meta.version || "v1");
-        safeSet($("engineMode"), meta.mode || "local-first");
-        safeSet($("engineUpdated"), meta.lastUpdated || "—");
-        safeSet($("engineMeta"), `${meta.mode || "local-first"} • ${meta.offline ? "Offline-ready" : "Online"} • AI-guided`);
-
-        const dxAllowed = !!window.UV?.safety?.diagnosisAllowed;
-        safeSet($("dxAllowed"), dxAllowed ? "allowed" : "blocked");
-        $("chipDx")?.classList.toggle("warn", !dxAllowed);
-
-        const eb = !!window.UV?.safety?.emergencyBypass;
-        safeSet($("emergencyBypass"), eb ? "on" : "off");
-      });
-
-      const input = $("emergencyInput");
-      const out = $("emergencyMatch");
-      const chip = $("emergencyResult");
-      function testEmergency(){
-        const v = input?.value || "";
-        const isEmergency = window.UV?.safety?.isEmergencyText ? window.UV.safety.isEmergencyText(v) : false;
-        safeSet(out, v.trim() ? (isEmergency ? "EMERGENCY MATCH" : "no match") : "—");
-        if (chip){
-          chip.classList.remove("good","warn","bad");
-          chip.classList.add(!v.trim() ? "" : (isEmergency ? "bad" : "good"));
-        }
-      }
-      input?.addEventListener("input", testEmergency);
-      testEmergency();
-    })();
+    document.getElementById("year").textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
